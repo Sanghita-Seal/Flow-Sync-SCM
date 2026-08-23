@@ -6,6 +6,10 @@ import notFoundMiddleware from "./common/middleware/not-found.middleware.js";
 import errorMiddleware from "./common/middleware/error.middleware.js";
 
 import demandRoutes from "./module/p2/demand/demand.routes.js";
+import inventoryRoutes from "./module/p2/inventory/inventory.routes.js";  
+import productionRoutes from "./module/p2/production/production.routes.js";
+import procurementRoutes from "./module/p2/procurement/procurement.routes.js";
+import markdownRoutes from "./module/p2/markdown/markdown.routes.js";
 
 const app = express();
 
@@ -46,6 +50,10 @@ app.use(authMiddleware);
 
 
 app.use("/api/demand", demandRoutes);
+app.use("/api/inventory", inventoryRoutes);
+app.use("/api/production", productionRoutes);
+app.use("/api/procurement", procurementRoutes);
+app.use("/api/markdown", markdownRoutes);
 
 //404 handler
 app.use(notFoundMiddleware);
