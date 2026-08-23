@@ -1,5 +1,5 @@
 import express from "express";
-import pool from "./src/config/database.js";
+import pool from "./src/common/config/database.js";
 const app = express();
 const PORT = 5000;
 

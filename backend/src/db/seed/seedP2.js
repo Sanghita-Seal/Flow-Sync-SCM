@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import xlsx from "xlsx";
-import pool from "../../config/database.js";
+import pool from "../../common/config/database.js";
 
 const filePath = path.join(
     process.cwd(),
