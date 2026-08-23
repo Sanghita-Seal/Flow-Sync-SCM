@@ -10,6 +10,7 @@ import inventoryRoutes from "./module/p2/inventory/inventory.routes.js";
 import productionRoutes from "./module/p2/production/production.routes.js";
 import procurementRoutes from "./module/p2/procurement/procurement.routes.js";
 import markdownRoutes from "./module/p2/markdown/markdown.routes.js";
+import sopRoutes from "./module/p2/sop/sop.routes.js";
 
 const app = express();
 
@@ -54,6 +55,7 @@ app.use("/api/inventory", inventoryRoutes);
 app.use("/api/production", productionRoutes);
 app.use("/api/procurement", procurementRoutes);
 app.use("/api/markdown", markdownRoutes);
+app.use("/api/sop", sopRoutes);
 
 //404 handler
 app.use(notFoundMiddleware);
