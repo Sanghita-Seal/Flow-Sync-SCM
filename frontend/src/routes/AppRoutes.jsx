@@ -1,33 +1,38 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
-import ProtectedRoute from "./ProtectedRoute";
-import Login from "../pages/auth/Login";
-import Register from "../pages/auth/Register";
-import ForgotPassword from "../pages/auth/ForgotPassword";
 import Dashboard from "../pages/dashboard/Dashboard";
+import TruckTracker from "../pages/e2/TruckTracker";
+
+// Auth routes and ProtectedRoute intentionally skipped for now —
+// see AuthContext for the stub that keeps everything logged in.
 
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route
+        path="/"
+        element={
+          <MainLayout>
+            <Dashboard />
+          </MainLayout>
+        }
+      />
 
-      <Route element={<ProtectedRoute />}>
-        <Route element={<MainLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          {/*
-            Next build steps (per the agreed order):
-            - /e2/trucks, /e2/yard, /e2/docks, /e2/deliveries  (TruckTracker, Yard, Docks, Deliveries)
-            - /p2/sop, /p2/demand, /p2/inventory, /p2/production, /p2/procurement, /p2/markdown
-            - /alerts
-            Add each <Route> here once its page component exists.
-          */}
-        </Route>
-      </Route>
+      <Route
+        path="/e2/trucks"
+        element={
+          <MainLayout>
+            <TruckTracker />
+          </MainLayout>
+        }
+      />
 
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      {/* Add as each page is built:
+      <Route path="/e2/yard" element={<MainLayout><Yard /></MainLayout>} />
+      <Route path="/e2/docks" element={<MainLayout><Docks /></MainLayout>} />
+      <Route path="/e2/deliveries" element={<MainLayout><Deliveries /></MainLayout>} />
+      <Route path="/alerts" element={<MainLayout><Alerts /></MainLayout>} />
+      */}
     </Routes>
   );
 }

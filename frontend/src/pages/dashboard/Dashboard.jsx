@@ -1,21 +1,15 @@
 import PageWrapper from "../../components/layout/PageWrapper";
 import KPICard from "../../components/ui/KPICard";
-import { Bell } from "../../components/ui/Icons";
 import {
   Truck, Package, Dock, Yard, Alert,
-  Demand, Inventory, Procurement, Production, SOP, Markdown,
+  Demand, Inventory, Procurement, Production, SOP, Markdown, Bell,
 } from "../../components/ui/Icons";
 
 /* ------------------------------------------------------------------ */
-/* MOCK DATA — shaped to match dashboardApi.getOverview()'s expected   */
-/* response. Once the backend endpoint is ready, replace this with:    */
-/*                                                                     */
-/*   const [overview, setOverview] = useState(null);                  */
-/*   useEffect(() => {                                                */
-/*     dashboardApi.getOverview().then(setOverview);                  */
-/*   }, []);                                                          */
-/*                                                                     */
-/* and read kpis / recentActivity / alertSummary off `overview`.       */
+/* MOCK DATA — replace with a real API call once the backend endpoint  */
+/* is ready:                                                            */
+/*   const [overview, setOverview] = useState(null);                   */
+/*   useEffect(() => { dashboardApi.getOverview().then(setOverview) }); */
 /* ------------------------------------------------------------------ */
 
 const KPIS = [
@@ -56,7 +50,7 @@ const ALERT_SUMMARY = [
 ];
 
 const TONE_BG = { blue: "bg-blue-50", emerald: "bg-emerald-50", amber: "bg-amber-50", rose: "bg-rose-50" };
-const TONE_TEXT = { blue: "text-blue-600", emerald: "text-emerald-600", amber: "text-amber-600", rose: "text-rose-600" };
+const TONE_TEXT = { blue: "text-blue-700", emerald: "text-emerald-700", amber: "text-amber-700", rose: "text-rose-700" };
 const TONE_DOT = { blue: "bg-blue-500", emerald: "bg-emerald-500", amber: "bg-amber-500", rose: "bg-rose-500" };
 
 function ModuleCard({ name, description, icon: IconComp, tone }) {
@@ -67,7 +61,7 @@ function ModuleCard({ name, description, icon: IconComp, tone }) {
       </div>
       <div>
         <p className="text-sm font-semibold text-slate-900">{name}</p>
-        <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{description}</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-slate-600">{description}</p>
       </div>
     </button>
   );
@@ -80,7 +74,7 @@ function SectionCard({ title, description, tone, children }) {
         <span className={`h-2 w-2 rounded-full ${TONE_DOT[tone]}`} />
         <div>
           <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
-          <p className="text-xs text-slate-500">{description}</p>
+          <p className="text-xs text-slate-600">{description}</p>
         </div>
       </div>
       {children}
@@ -96,10 +90,10 @@ function RecentActivity() {
         {RECENT_ACTIVITY.map((a) => (
           <li key={a.id} className="flex items-start justify-between gap-3 text-sm">
             <div className="flex items-start gap-2">
-              <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-400" />
-              <span className="text-slate-700">{a.text}</span>
+              <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500" />
+              <span className="text-slate-800">{a.text}</span>
             </div>
-            <span className="flex-shrink-0 text-xs text-slate-400">{a.time}</span>
+            <span className="flex-shrink-0 text-xs text-slate-500">{a.time}</span>
           </li>
         ))}
       </ul>
@@ -129,7 +123,7 @@ export default function Dashboard() {
       title="Welcome to SCM Control Tower"
       description="Visibility across warehouse execution and supply-chain planning, in one place."
       actions={
-        <button className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-500 hover:border-slate-300">
+        <button className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:border-slate-300">
           <Bell width={13} height={13} />
           {KPIS.find((k) => k.key === "activeAlerts")?.value} active alerts
         </button>

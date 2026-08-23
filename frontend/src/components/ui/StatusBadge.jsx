@@ -1,12 +1,19 @@
-import { STATUS_TONE, TONE_STYLES } from "../../utils/constants";
+const STYLES = {
+  AVAILABLE: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  ACTIVE: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  IN_TRANSIT: "bg-amber-50 text-amber-700 border-amber-200",
+  OCCUPIED: "bg-rose-50 text-rose-700 border-rose-200",
+  DELAYED: "bg-rose-50 text-rose-700 border-rose-200",
+  RESERVED: "bg-amber-50 text-amber-700 border-amber-200",
+  DELIVERED: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  NOT_STARTED: "bg-slate-100 text-slate-600 border-slate-200",
+};
 
 export default function StatusBadge({ status }) {
-  const tone = STATUS_TONE[status] || "slate";
-  const t = TONE_STYLES[tone];
-
+  const style = STYLES[status] || STYLES.NOT_STARTED;
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${t.bg} ${t.text}`}>
-      {status}
+    <span className={`inline-block text-xs px-2 py-0.5 rounded-full border capitalize font-medium ${style}`}>
+      {(status || "unknown").toLowerCase().replace("_", " ")}
     </span>
   );
 }
