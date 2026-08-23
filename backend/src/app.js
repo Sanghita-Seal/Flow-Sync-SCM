@@ -6,9 +6,9 @@ import notFoundMiddleware from "./common/middleware/not-found.middleware.js";
 import errorMiddleware from "./common/middleware/error.middleware.js";
 
 import demandRoutes from "./module/p2/demand/demand.routes.js";
+import truckRoutes from "./module/e2/truck/truck.routes.js";
 
 const app = express();
-
 
 app.use(express.json());
 
@@ -38,19 +38,17 @@ app.get("/db-test", async (req, res) => {
   }
 });
 
-
-//Authentication middleware
-//temporary development version for now
+// Authentication middleware
 app.use(authMiddleware);
 
-
-
+// Routes
 app.use("/api/demand", demandRoutes);
+app.use("/api/e2/truck", truckRoutes);
 
-//404 handler
+// 404 handler
 app.use(notFoundMiddleware);
 
-//Error handler
+// Error handler
 app.use(errorMiddleware);
 
 export default app;
