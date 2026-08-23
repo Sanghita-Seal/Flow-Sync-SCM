@@ -7,6 +7,9 @@ import errorMiddleware from "./common/middleware/error.middleware.js";
 
 import demandRoutes from "./module/p2/demand/demand.routes.js";
 import truckRoutes from "./module/e2/truck/truck.routes.js";
+import dockRoutes from "./module/e2/dock/dock.routes.js";
+import yardRoutes from "./module/e2/yard/yard.routes.js";
+import shipmentRoutes from "./module/e2/shipment/shipment.routes.js";
 
 const app = express();
 
@@ -44,6 +47,9 @@ app.use(authMiddleware);
 // Routes
 app.use("/api/demand", demandRoutes);
 app.use("/api/e2/truck", truckRoutes);
+app.use("/api/e2/dock", dockRoutes);
+app.use("/api/e2/yard", yardRoutes);
+app.use("/api/e2/shipment", shipmentRoutes);
 
 // 404 handler
 app.use(notFoundMiddleware);
