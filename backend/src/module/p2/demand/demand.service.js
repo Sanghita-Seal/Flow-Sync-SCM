@@ -6,6 +6,17 @@ class DemandService {
 
     return demand;
   }
+  static async getDemandByProductId(productId) {
+    const demand = await DemandModel.getDemandByProductId(productId);
+
+    return demand;
+  }
+  static async getDemandSummary() {
+    return await DemandModel.getDemandSummary();
+  }
+  static async getDemandTrend() {
+    return await DemandModel.getDemandTrend();
+  }
 }
 
 export default DemandService;
