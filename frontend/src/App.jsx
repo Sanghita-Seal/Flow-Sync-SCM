@@ -1,12 +1,12 @@
+import Dashboard from "./pages/dashboard/Dashboard"
 
 
 
 function App() {
 
   return (
-    <div className="text-3xl font-bold text-blue-500">
-    hello world
-    </div>
+    <Dashboard />
+
   )
 }
 
