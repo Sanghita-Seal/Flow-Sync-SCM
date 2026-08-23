@@ -5,6 +5,7 @@ import authMiddleware from "./common/middleware/auth.middleware.js";
 import notFoundMiddleware from "./common/middleware/not-found.middleware.js";
 import errorMiddleware from "./common/middleware/error.middleware.js";
 
+import demandRoutes from "./module/p2/demand/demand.routes.js";
 
 const app = express();
 
@@ -41,6 +42,10 @@ app.get("/db-test", async (req, res) => {
 //Authentication middleware
 //temporary development version for now
 app.use(authMiddleware);
+
+
+
+app.use("/api/demand", demandRoutes);
 
 //404 handler
 app.use(notFoundMiddleware);
