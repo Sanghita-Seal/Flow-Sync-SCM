@@ -1,7 +1,13 @@
 import express from "express";
 import pool from "./common/config/database.js";
 
+import authMiddleware from "./common/middleware/auth.middleware.js";
+import notFoundMiddleware from "./common/middleware/not-found.middleware.js";
+import errorMiddleware from "./common/middleware/error.middleware.js";
+
+
 const app = express();
+
 
 app.use(express.json());
 
@@ -30,5 +36,16 @@ app.get("/db-test", async (req, res) => {
     });
   }
 });
+
+
+//Authentication middleware
+//temporary development version for now
+app.use(authMiddleware);
+
+//404 handler
+app.use(notFoundMiddleware);
+
+//Error handler
+app.use(errorMiddleware);
 
 export default app;
