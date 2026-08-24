@@ -11,6 +11,7 @@ import productionRoutes from "./module/p2/production/production.routes.js";
 import procurementRoutes from "./module/p2/procurement/procurement.routes.js";
 import markdownRoutes from "./module/p2/markdown/markdown.routes.js";
 import sopRoutes from "./module/p2/sop/sop.routes.js";
+import overviewRoutes from "./module/p2/overview/overview.routes.js";
 
 import truckRoutes from "./module/e2/truck/truck.routes.js";
 import dockRoutes from "./module/e2/dock/dock.routes.js";
@@ -62,6 +63,7 @@ app.use("/api/e2/truck", truckRoutes);
 app.use("/api/e2/dock", dockRoutes);
 app.use("/api/e2/yard", yardRoutes);
 app.use("/api/e2/shipment", shipmentRoutes);
+app.use("/api/p2/overview", overviewRoutes);
 
 // 404 handler
 app.use(notFoundMiddleware);
