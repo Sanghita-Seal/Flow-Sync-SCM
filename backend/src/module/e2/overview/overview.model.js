@@ -8,20 +8,20 @@ class OverviewModel {
           COUNT(*) AS total_trucks,
 
           COUNT(*) FILTER (
-            WHERE status IN ('SCHEDULED', 'IN_TRANSIT')
-          ) AS arriving_trucks,
+            WHERE status = 'IN_TRANSIT'
+          ) AS trucks_in_transit,
 
           COUNT(*) FILTER (
-            WHERE status = 'IN_YARD'
-          ) AS trucks_in_yard,
+            WHERE status = 'ARRIVED'
+          ) AS trucks_arrived,
 
           COUNT(*) FILTER (
             WHERE status = 'DELAYED'
           ) AS delayed_trucks,
 
           COUNT(*) FILTER (
-            WHERE status = 'AT_DOCK'
-          ) AS trucks_at_dock
+            WHERE current_yard_name IS NOT NULL
+          ) AS trucks_in_yard
 
         FROM e2.trucks
       ),
@@ -39,12 +39,8 @@ class OverviewModel {
           ) AS occupied_docks,
 
           COUNT(*) FILTER (
-            WHERE status = 'RESERVED'
-          ) AS reserved_docks,
-
-          COUNT(*) FILTER (
-            WHERE status = 'MAINTENANCE'
-          ) AS maintenance_docks
+            WHERE status = 'UNAVAILABLE'
+          ) AS unavailable_docks
 
         FROM e2.docks
       ),
@@ -61,7 +57,9 @@ class OverviewModel {
             WHERE status = 'FULL'
           ) AS full_yards,
 
-          COALESCE(SUM(capacity), 0) AS total_capacity
+          COALESCE(SUM(capacity), 0) AS total_capacity,
+
+          COALESCE(SUM(number_of_trucks), 0) AS total_trucks_in_yards
 
         FROM e2.yards
       ),
@@ -80,43 +78,38 @@ class OverviewModel {
 
           COUNT(*) FILTER (
             WHERE status = 'DELAYED'
-          ) AS delayed_shipments,
-
-          COUNT(*) FILTER (
-            WHERE status = 'COMPLETED'
-          ) AS completed_shipments
+          ) AS delayed_shipments
 
         FROM e2.shipments
       )
 
       SELECT
         ts.total_trucks,
-        ts.arriving_trucks,
-        ts.trucks_in_yard,
+        ts.trucks_in_transit,
+        ts.trucks_arrived,
         ts.delayed_trucks,
-        ts.trucks_at_dock,
+        ts.trucks_in_yard,
 
         ds.total_docks,
         ds.available_docks,
         ds.occupied_docks,
-        ds.reserved_docks,
-        ds.maintenance_docks,
+        ds.unavailable_docks,
 
         ys.total_yards,
         ys.active_yards,
         ys.full_yards,
         ys.total_capacity,
+        ys.total_trucks_in_yards,
 
         ss.total_shipments,
         ss.shipments_in_transit,
         ss.shipments_arrived,
-        ss.delayed_shipments,
-        ss.completed_shipments
+        ss.delayed_shipments
 
       FROM truck_summary ts
       CROSS JOIN dock_summary ds
       CROSS JOIN yard_summary ys
-      CROSS JOIN shipment_summary ss
+      CROSS JOIN shipment_summary ss;
     `;
 
     const result = await pool.query(query);

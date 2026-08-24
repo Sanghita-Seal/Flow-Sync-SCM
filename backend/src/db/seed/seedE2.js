@@ -1,4 +1,3 @@
-import fs from "fs";
 import path from "path";
 import xlsx from "xlsx";
 import pg from "pg";
@@ -8,11 +7,6 @@ dotenv.config();
 
 const { Pool } = pg;
 
-// ------------------------------------------------------------------
-// Connection: paste your Neon connection string into a .env file as
-// DATABASE_URL, e.g.
-// DATABASE_URL=postgresql://user:password@ep-xxxx.neon.tech/dbname?sslmode=require
-// ------------------------------------------------------------------
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
@@ -23,7 +17,7 @@ const filePath = path.join(
     "src",
     "db",
     "seed",
-    "e2_dummy_data.xlsx"
+    "E2_Prototype_Final_Dataset_v2.xlsx"
 );
 
 function readSheet(sheetName) {
@@ -46,11 +40,9 @@ async function seedE2() {
 
         await client.query("BEGIN");
 
-        /*
-         * WARNING:
-         * This resets the E2 tables before inserting.
-         * Use this only for development/seeding.
-         */
+        // ==========================================
+        // RESET TABLES
+        // ==========================================
 
         await client.query(`
             TRUNCATE TABLE
@@ -73,14 +65,21 @@ async function seedE2() {
             await client.query(
                 `
                 INSERT INTO e2.yards
-                    (id, name, capacity, status)
+                    (
+                        id,
+                        name,
+                        capacity,
+                        number_of_trucks,
+                        status
+                    )
                 VALUES
-                    ($1, $2, $3, $4)
+                    ($1, $2, $3, $4, $5)
                 `,
                 [
                     row.id,
                     row.name,
                     row.capacity,
+                    row.number_of_trucks || 0,
                     row.status || "ACTIVE"
                 ]
             );
@@ -98,15 +97,20 @@ async function seedE2() {
             await client.query(
                 `
                 INSERT INTO e2.docks
-                    (id, dock_code, status, supported_load_type)
+                    (
+                        id,
+                        dock_code,
+                        yard_name,
+                        status
+                    )
                 VALUES
                     ($1, $2, $3, $4)
                 `,
                 [
                     row.id,
                     row.dock_code,
-                    row.status || "AVAILABLE",
-                    row.supported_load_type
+                    row.yard_name,
+                    row.status || "AVAILABLE"
                 ]
             );
         }
@@ -123,7 +127,13 @@ async function seedE2() {
             await client.query(
                 `
                 INSERT INTO e2.shipments
-                    (id, shipment_reference, origin, destination, status)
+                    (
+                        id,
+                        shipment_reference,
+                        origin,
+                        destination,
+                        status
+                    )
                 VALUES
                     ($1, $2, $3, $4, $5)
                 `,
@@ -132,7 +142,7 @@ async function seedE2() {
                     row.shipment_reference,
                     row.origin,
                     row.destination,
-                    row.status || "PLANNED"
+                    row.status || "IN_TRANSIT"
                 ]
             );
         }
@@ -141,7 +151,6 @@ async function seedE2() {
 
         // ==========================================
         // 4. TRUCKS
-        // (shipment_id -> shipments.id, current_yard_id -> yards.id)
         // ==========================================
 
         const trucks = readSheet("trucks");
@@ -158,18 +167,16 @@ async function seedE2() {
                         load_type,
                         priority,
                         status,
-                        scheduled_arrival,
-                        current_eta,
-                        current_yard_id,
+                        current_yard_name,
                         current_location,
                         latitude,
                         longitude,
-                        location_updated_at
+                        current_eta
                     )
                 VALUES
                     (
-                        $1, $2, $3, $4, $5, $6, $7,
-                        $8, $9, $10, $11, $12, $13, $14
+                        $1, $2, $3, $4, $5, $6,
+                        $7, $8, $9, $10, $11, $12
                     )
                 `,
                 [
@@ -178,15 +185,13 @@ async function seedE2() {
                     row.tracking_number,
                     row.shipment_id || null,
                     row.load_type,
-                    row.priority || "NORMAL",
-                    row.status || "SCHEDULED",
-                    row.scheduled_arrival || null,
-                    row.current_eta || null,
-                    row.current_yard_id || null,
+                    row.priority || "MEDIUM",
+                    row.status || "IN_TRANSIT",
+                    row.current_yard_name || null,
                     row.current_location,
                     row.latitude,
                     row.longitude,
-                    row.location_updated_at || null
+                    row.current_eta || null
                 ]
             );
         }
@@ -195,89 +200,71 @@ async function seedE2() {
 
         // ==========================================
         // 5. DOCK ASSIGNMENTS
-        // (truck_id -> trucks.id, dock_id -> docks.id)
         // ==========================================
 
         const dockAssignments = readSheet("dock_assignments");
 
         for (const row of dockAssignments) {
-            if (!row.truck_id) {
-                throw new Error("dock_assignments row missing truck_id");
-            }
-
-            if (!row.dock_id) {
-                throw new Error("dock_assignments row missing dock_id");
-            }
-
             await client.query(
                 `
                 INSERT INTO e2.dock_assignments
                     (
                         id,
-                        truck_id,
-                        dock_id,
-                        scheduled_time,
-                        assigned_time,
-                        status,
-                        assignment_reason
+                        trailer_id,
+                        dock_code,
+                        yard_name
                     )
                 VALUES
-                    ($1, $2, $3, $4, $5, $6, $7)
+                    ($1, $2, $3, $4)
                 `,
                 [
                     row.id,
-                    row.truck_id,
-                    row.dock_id,
-                    row.scheduled_time || null,
-                    row.assigned_time || null,
-                    row.status || "ASSIGNED",
-                    row.assignment_reason || null
+                    row.trailer_id,
+                    row.dock_code,
+                    row.yard_name
                 ]
             );
         }
 
-        console.log(`✓ Dock assignments inserted: ${dockAssignments.length}`);
+        console.log(
+            `✓ Dock assignments inserted: ${dockAssignments.length}`
+        );
 
         // ==========================================
         // 6. TRUCK ALERTS
-        // (truck_id -> trucks.id)
         // ==========================================
 
         const truckAlerts = readSheet("truck_alerts");
 
         for (const row of truckAlerts) {
-            if (!row.truck_id) {
-                throw new Error("truck_alerts row missing truck_id");
-            }
-
             await client.query(
                 `
                 INSERT INTO e2.truck_alerts
                     (
                         id,
-                        truck_id,
-                        alert_type,
-                        severity,
-                        message,
-                        is_resolved,
-                        resolved_at
+                        trailer_id,
+                        alert_reason,
+                        message
                     )
                 VALUES
-                    ($1, $2, $3, $4, $5, $6, $7)
+                    ($1, $2, $3, $4)
                 `,
                 [
                     row.id,
-                    row.truck_id,
-                    row.alert_type,
-                    row.severity || "MEDIUM",
-                    row.message,
-                    row.is_resolved === true || row.is_resolved === "TRUE" || row.is_resolved === 1,
-                    row.resolved_at || null
+                    row.trailer_id,
+                    row.alert_reason,
+                    row.message
                 ]
             );
         }
 
-        console.log(`✓ Truck alerts inserted: ${truckAlerts.length}`);
+        console.log(
+            `✓ Truck alerts inserted: ${truckAlerts.length}`
+        );
+
+        // ==========================================
+        // COMMIT
+        // ==========================================
 
         await client.query("COMMIT");
 

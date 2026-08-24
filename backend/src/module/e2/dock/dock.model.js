@@ -7,8 +7,8 @@ class DockModel {
       SELECT
         id,
         dock_code,
-        status,
-        supported_load_type
+        yard_name,
+        status
       FROM e2.docks
       ORDER BY dock_code;
     `;
@@ -24,8 +24,8 @@ class DockModel {
       SELECT
         id,
         dock_code,
-        status,
-        supported_load_type
+        yard_name,
+        status
       FROM e2.docks
       WHERE dock_code = $1;
     `;
@@ -41,8 +41,8 @@ class DockModel {
       SELECT
         id,
         dock_code,
-        status,
-        supported_load_type
+        yard_name,
+        status
       FROM e2.docks
       WHERE status = $1
       ORDER BY dock_code;
