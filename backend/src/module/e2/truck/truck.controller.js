@@ -51,6 +51,36 @@ class TruckController {
       next(error);
     }
   }
+
+  // Get truck by tracking number
+static async getTruckByTrackingNumber(req, res) {
+  try {
+    const { tracking_number } = req.params;
+
+    const truck = await TruckService.getTruckByTrackingNumber(
+      tracking_number
+    );
+
+    if (!truck) {
+      return res.status(404).json({
+        success: false,
+        message: "Truck not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: truck
+    });
+  } catch (error) {
+    console.error("Error fetching truck by tracking number:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+}
 }
 
 export default TruckController;

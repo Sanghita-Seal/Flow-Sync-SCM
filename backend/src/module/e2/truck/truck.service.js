@@ -24,6 +24,11 @@ class TruckService {
   static async getTruckLocations() {
     return await TruckModel.getTruckLocations();
   }
+
+  // Get truck by tracking number
+static async getTruckByTrackingNumber(trackingNumber) {
+  return await TruckModel.getTruckByTrackingNumber(trackingNumber);
+}
 }
 
 export default TruckService;

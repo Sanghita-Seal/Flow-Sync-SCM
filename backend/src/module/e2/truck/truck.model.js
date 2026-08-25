@@ -127,6 +127,55 @@ class TruckModel {
 
     return result.rows;
   }
+
+  static async getTruckLocations() {
+  const query = `
+    SELECT
+      id,
+      trailer_id,
+      tracking_number,
+      shipment_id,
+      status
+      current_yard_name,
+      current_location,
+      latitude,
+      longitude,
+      current_eta
+    FROM e2.trucks
+    WHERE latitude IS NOT NULL
+      AND longitude IS NOT NULL
+    ORDER BY trailer_id;
+  `;
+
+  const result = await pool.query(query);
+
+  return result.rows;
+}
+
+// Get truck by tracking number
+static async getTruckByTrackingNumber(trackingNumber) {
+  const query = `
+    SELECT
+      id,
+      trailer_id,
+      tracking_number,
+      shipment_id,
+      load_type,
+      priority,
+      status,
+      current_yard_name,
+      current_location,
+      latitude,
+      longitude,
+      current_eta
+    FROM e2.trucks
+    WHERE tracking_number = $1;
+  `;
+
+  const result = await pool.query(query, [trackingNumber]);
+
+  return result.rows[0];
+}
 }
 
 export default TruckModel;
