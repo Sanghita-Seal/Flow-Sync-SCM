@@ -3,6 +3,7 @@ import ApiResponse from "../../../common/utils/api-response.js";
 
 class ProcurementController {
 
+  // GET /api/procurement
   static async getProcurement(req, res, next) {
     try {
       const procurement =
@@ -18,6 +19,7 @@ class ProcurementController {
     }
   }
 
+  // GET /api/procurement/:productId
   static async getProcurementByProductId(req, res, next) {
     try {
       const procurement =
@@ -33,6 +35,7 @@ class ProcurementController {
     }
   }
 
+  // GET /api/procurement/summary
   static async getProcurementSummary(req, res, next) {
     try {
       const summary =
@@ -44,6 +47,7 @@ class ProcurementController {
     }
   }
 
+  // GET /api/procurement/risk
   static async getProcurementRisk(req, res, next) {
     try {
       const risk =
@@ -67,7 +71,19 @@ class ProcurementController {
           procurementPlanId
         );
 
+      // Procurement plan does not exist
+      if (!data) {
+        const error = new Error(
+          "Procurement plan not found"
+        );
+
+        error.statusCode = 404;
+
+        throw error;
+      }
+
       return ApiResponse.ok(res, data);
+
     } catch (error) {
       next(error);
     }
