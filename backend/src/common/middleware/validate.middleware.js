@@ -12,7 +12,10 @@ const validate = (DtoClass, source = "body") => {
       return next(ApiError.badRequest(message));
     }
 
-    req[source] = value;
+    // Do not overwrite req.query / req.params.
+    // Store validated data separately.
+    req.validated = req.validated || {};
+    req.validated[source] = value;
 
     next();
   };

@@ -1,4 +1,3 @@
-import fs from "fs";
 import path from "path";
 import xlsx from "xlsx";
 import pg from "pg";
@@ -8,49 +7,72 @@ dotenv.config();
 
 const { Pool } = pg;
 
-// ------------------------------------------------------------------
-// Connection: paste your Neon connection string into a .env file as
-// DATABASE_URL, e.g.
-// DATABASE_URL=postgresql://user:password@ep-xxxx.neon.tech/dbname?sslmode=require
-// ------------------------------------------------------------------
+// ============================================================
+// DATABASE CONNECTION
+// ============================================================
+
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
+
+// ============================================================
+// EXCEL FILE
+// ============================================================
 
 const filePath = path.join(
     process.cwd(),
     "src",
     "db",
     "seed",
-    "e2_dummy_data.xlsx"
+    "E2_Prototype_Final_Dataset_v2.xlsx"
 );
 
+// ============================================================
+// READ EXCEL SHEET
+// ============================================================
+
 function readSheet(sheetName) {
-    const workbook = xlsx.readFile(filePath, { cellDates: true });
+    const workbook = xlsx.readFile(filePath, {
+        cellDates: true
+    });
 
-    const sheet = workbook.Sheets[sheetName];
+    const actualSheetName = workbook.SheetNames.find(
+        (name) =>
+            name.toLowerCase().trim() === sheetName.toLowerCase().trim()
+    );
 
-    if (!sheet) {
-        throw new Error(`Sheet "${sheetName}" not found`);
+    if (!actualSheetName) {
+        throw new Error(
+            `Sheet "${sheetName}" not found. Available sheets: ${workbook.SheetNames.join(", ")}`
+        );
     }
 
-    return xlsx.utils.sheet_to_json(sheet, { defval: null });
+    const sheet = workbook.Sheets[actualSheetName];
+
+    return xlsx.utils.sheet_to_json(sheet, {
+        defval: null
+    });
 }
+
+// ============================================================
+// SEED DATABASE
+// ============================================================
 
 async function seedE2() {
     const client = await pool.connect();
 
     try {
         console.log("Starting E2 database seed...");
+        console.log(`Excel file: ${filePath}`);
 
         await client.query("BEGIN");
 
-        /*
-         * WARNING:
-         * This resets the E2 tables before inserting.
-         * Use this only for development/seeding.
-         */
+        // =====================================================
+        // RESET TABLES
+        // =====================================================
 
         await client.query(`
             TRUNCATE TABLE
@@ -63,24 +85,37 @@ async function seedE2() {
             RESTART IDENTITY CASCADE
         `);
 
-        // ==========================================
-        // 1. YARDS
-        // ==========================================
+        console.log("✓ Existing E2 data cleared");
 
-        const yards = readSheet("yards");
+        // =====================================================
+        // 1. YARDS
+        // =====================================================
+
+        const yards = readSheet("Yards");
 
         for (const row of yards) {
+
             await client.query(
                 `
                 INSERT INTO e2.yards
-                    (id, name, capacity, status)
+                (
+                    name,
+                    capacity,
+                    number_of_trucks,
+                    status
+                )
                 VALUES
-                    ($1, $2, $3, $4)
+                (
+                    $1,
+                    $2,
+                    $3,
+                    $4
+                )
                 `,
                 [
-                    row.id,
                     row.name,
                     row.capacity,
+                    row.number_of_trucks ?? 0,
                     row.status || "ACTIVE"
                 ]
             );
@@ -88,205 +123,326 @@ async function seedE2() {
 
         console.log(`✓ Yards inserted: ${yards.length}`);
 
-        // ==========================================
+        // =====================================================
         // 2. DOCKS
-        // ==========================================
+        // =====================================================
 
-        const docks = readSheet("docks");
+        const docks = readSheet("Docks");
 
         for (const row of docks) {
+
+            // Validate yard exists
+            const yardResult = await client.query(
+                `
+                SELECT name
+                FROM e2.yards
+                WHERE name = $1
+                `,
+                [row.yard_name]
+            );
+
+            if (yardResult.rows.length === 0) {
+                throw new Error(
+                    `Dock ${row.dock_code} refers to unknown yard: ${row.yard_name}`
+                );
+            }
+
             await client.query(
                 `
                 INSERT INTO e2.docks
-                    (id, dock_code, status, supported_load_type)
+                (
+                    dock_code,
+                    yard_name,
+                    status
+                )
                 VALUES
-                    ($1, $2, $3, $4)
+                (
+                    $1,
+                    $2,
+                    $3
+                )
                 `,
                 [
-                    row.id,
                     row.dock_code,
-                    row.status || "AVAILABLE",
-                    row.supported_load_type
+                    row.yard_name,
+                    row.status || "AVAILABLE"
                 ]
             );
         }
 
         console.log(`✓ Docks inserted: ${docks.length}`);
 
-        // ==========================================
+        // =====================================================
         // 3. SHIPMENTS
-        // ==========================================
+        // =====================================================
 
-        const shipments = readSheet("shipments");
+        const shipments = readSheet("Shipments");
 
         for (const row of shipments) {
+
             await client.query(
                 `
                 INSERT INTO e2.shipments
-                    (id, shipment_reference, origin, destination, status)
+                (
+                    shipment_reference,
+                    origin,
+                    destination,
+                    status
+                )
                 VALUES
-                    ($1, $2, $3, $4, $5)
+                (
+                    $1,
+                    $2,
+                    $3,
+                    $4
+                )
                 `,
                 [
-                    row.id,
                     row.shipment_reference,
                     row.origin,
                     row.destination,
-                    row.status || "PLANNED"
+                    row.status || "IN_TRANSIT"
                 ]
             );
         }
 
         console.log(`✓ Shipments inserted: ${shipments.length}`);
 
-        // ==========================================
+        // =====================================================
         // 4. TRUCKS
-        // (shipment_id -> shipments.id, current_yard_id -> yards.id)
-        // ==========================================
+        // =====================================================
 
-        const trucks = readSheet("trucks");
+        const trucks = readSheet("Trucks");
 
         for (const row of trucks) {
+
+            // -------------------------------------------------
+            // Find shipment UUID using shipment_reference
+            // -------------------------------------------------
+
+            let shipmentId = null;
+
+            if (row.shipment_reference) {
+
+                const shipmentResult = await client.query(
+                    `
+                    SELECT id
+                    FROM e2.shipments
+                    WHERE shipment_reference = $1
+                    `,
+                    [row.shipment_reference]
+                );
+
+                if (shipmentResult.rows.length === 0) {
+                    throw new Error(
+                        `Truck ${row.trailer_id} refers to unknown shipment: ${row.shipment_reference}`
+                    );
+                }
+
+                shipmentId = shipmentResult.rows[0].id;
+            }
+
+            // -------------------------------------------------
+            // Insert truck
+            // -------------------------------------------------
+
             await client.query(
                 `
                 INSERT INTO e2.trucks
-                    (
-                        id,
-                        trailer_id,
-                        tracking_number,
-                        shipment_id,
-                        load_type,
-                        priority,
-                        status,
-                        scheduled_arrival,
-                        current_eta,
-                        current_yard_id,
-                        current_location,
-                        latitude,
-                        longitude,
-                        location_updated_at
-                    )
+                (
+                    trailer_id,
+                    tracking_number,
+                    shipment_id,
+                    load_type,
+                    priority,
+                    status,
+                    current_yard_name,
+                    current_location,
+                    latitude,
+                    longitude,
+                    current_eta
+                )
                 VALUES
-                    (
-                        $1, $2, $3, $4, $5, $6, $7,
-                        $8, $9, $10, $11, $12, $13, $14
-                    )
+                (
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    $5,
+                    $6,
+                    $7,
+                    $8,
+                    $9,
+                    $10,
+                    $11
+                )
                 `,
                 [
-                    row.id,
                     row.trailer_id,
                     row.tracking_number,
-                    row.shipment_id || null,
+                    shipmentId,
                     row.load_type,
-                    row.priority || "NORMAL",
-                    row.status || "SCHEDULED",
-                    row.scheduled_arrival || null,
-                    row.current_eta || null,
-                    row.current_yard_id || null,
+                    row.priority || "MEDIUM",
+                    row.status || "IN_TRANSIT",
+                    row.current_yard_name || null,
                     row.current_location,
                     row.latitude,
                     row.longitude,
-                    row.location_updated_at || null
+                    row.current_eta || null
                 ]
             );
         }
 
         console.log(`✓ Trucks inserted: ${trucks.length}`);
 
-        // ==========================================
+        // =====================================================
         // 5. DOCK ASSIGNMENTS
-        // (truck_id -> trucks.id, dock_id -> docks.id)
-        // ==========================================
+        // =====================================================
 
-        const dockAssignments = readSheet("dock_assignments");
+        const dockAssignments = readSheet("Dock Assignments");
 
         for (const row of dockAssignments) {
-            if (!row.truck_id) {
-                throw new Error("dock_assignments row missing truck_id");
+
+            // -------------------------------------------------
+            // Validate trailer
+            // -------------------------------------------------
+
+            const truckResult = await client.query(
+                `
+                SELECT trailer_id
+                FROM e2.trucks
+                WHERE trailer_id = $1
+                `,
+                [row.trailer_id]
+            );
+
+            if (truckResult.rows.length === 0) {
+                throw new Error(
+                    `Dock assignment refers to unknown trailer: ${row.trailer_id}`
+                );
             }
 
-            if (!row.dock_id) {
-                throw new Error("dock_assignments row missing dock_id");
+            // -------------------------------------------------
+            // Validate dock
+            // -------------------------------------------------
+
+            const dockResult = await client.query(
+                `
+                SELECT dock_code
+                FROM e2.docks
+                WHERE dock_code = $1
+                `,
+                [row.dock_code]
+            );
+
+            if (dockResult.rows.length === 0) {
+                throw new Error(
+                    `Dock assignment refers to unknown dock: ${row.dock_code}`
+                );
             }
+
+            // -------------------------------------------------
+            // Insert assignment
+            // -------------------------------------------------
 
             await client.query(
                 `
                 INSERT INTO e2.dock_assignments
-                    (
-                        id,
-                        truck_id,
-                        dock_id,
-                        scheduled_time,
-                        assigned_time,
-                        status,
-                        assignment_reason
-                    )
+                (
+                    trailer_id,
+                    dock_code,
+                    yard_name
+                )
                 VALUES
-                    ($1, $2, $3, $4, $5, $6, $7)
+                (
+                    $1,
+                    $2,
+                    $3
+                )
                 `,
                 [
-                    row.id,
-                    row.truck_id,
-                    row.dock_id,
-                    row.scheduled_time || null,
-                    row.assigned_time || null,
-                    row.status || "ASSIGNED",
-                    row.assignment_reason || null
+                    row.trailer_id,
+                    row.dock_code,
+                    row.yard_name
                 ]
             );
         }
 
-        console.log(`✓ Dock assignments inserted: ${dockAssignments.length}`);
+        console.log(
+            `✓ Dock assignments inserted: ${dockAssignments.length}`
+        );
 
-        // ==========================================
+        // =====================================================
         // 6. TRUCK ALERTS
-        // (truck_id -> trucks.id)
-        // ==========================================
+        // =====================================================
 
-        const truckAlerts = readSheet("truck_alerts");
+        const truckAlerts = readSheet("Truck Alerts");
 
         for (const row of truckAlerts) {
-            if (!row.truck_id) {
-                throw new Error("truck_alerts row missing truck_id");
+
+            // -------------------------------------------------
+            // Validate trailer
+            // -------------------------------------------------
+
+            const truckResult = await client.query(
+                `
+                SELECT trailer_id
+                FROM e2.trucks
+                WHERE trailer_id = $1
+                `,
+                [row.trailer_id]
+            );
+
+            if (truckResult.rows.length === 0) {
+                throw new Error(
+                    `Truck alert refers to unknown trailer: ${row.trailer_id}`
+                );
             }
+
+            // -------------------------------------------------
+            // Insert alert
+            // -------------------------------------------------
 
             await client.query(
                 `
                 INSERT INTO e2.truck_alerts
-                    (
-                        id,
-                        truck_id,
-                        alert_type,
-                        severity,
-                        message,
-                        is_resolved,
-                        resolved_at
-                    )
+                (
+                    trailer_id,
+                    alert_reason,
+                    message
+                )
                 VALUES
-                    ($1, $2, $3, $4, $5, $6, $7)
+                (
+                    $1,
+                    $2,
+                    $3
+                )
                 `,
                 [
-                    row.id,
-                    row.truck_id,
-                    row.alert_type,
-                    row.severity || "MEDIUM",
-                    row.message,
-                    row.is_resolved === true || row.is_resolved === "TRUE" || row.is_resolved === 1,
-                    row.resolved_at || null
+                    row.trailer_id,
+                    row.alert_reason,
+                    row.message
                 ]
             );
         }
 
-        console.log(`✓ Truck alerts inserted: ${truckAlerts.length}`);
+        console.log(
+            `✓ Truck alerts inserted: ${truckAlerts.length}`
+        );
+
+        // =====================================================
+        // COMMIT
+        // =====================================================
 
         await client.query("COMMIT");
 
         console.log("");
-        console.log("====================================");
+        console.log("============================================");
         console.log("E2 DATABASE SEED COMPLETED SUCCESSFULLY");
-        console.log("====================================");
+        console.log("============================================");
 
     } catch (error) {
+
         await client.query("ROLLBACK");
 
         console.error("");
@@ -296,9 +452,15 @@ async function seedE2() {
         process.exitCode = 1;
 
     } finally {
+
         client.release();
+
         await pool.end();
     }
 }
+
+// ============================================================
+// RUN
+// ============================================================
 
 seedE2();
