@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import pool from "./common/config/database.js";
 
 import authMiddleware from "./common/middleware/auth.middleware.js";
@@ -22,6 +23,10 @@ import shipmentRoutes from "./module/e2/shipment/shipment.routes.js";
 const app = express();
 
 app.use(express.json());
+
+app.use(cors({
+    origin: "http://localhost:5173"
+}));
 
 // Health check
 app.get("/", (req, res) => {
