@@ -2,6 +2,7 @@ import ProcurementService from "./procurement.service.js";
 import ApiResponse from "../../../common/utils/api-response.js";
 
 class ProcurementController {
+
   static async getProcurement(req, res, next) {
     try {
       const procurement =
@@ -51,6 +52,22 @@ class ProcurementController {
       return ApiResponse.list(res, risk, {
         count: risk.length,
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // GET /api/procurement/plans/:procurementPlanId/shipments
+  static async getProcurementPlanShipments(req, res, next) {
+    try {
+      const { procurementPlanId } = req.params;
+
+      const data =
+        await ProcurementService.getProcurementPlanShipments(
+          procurementPlanId
+        );
+
+      return ApiResponse.ok(res, data);
     } catch (error) {
       next(error);
     }

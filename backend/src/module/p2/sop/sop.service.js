@@ -116,6 +116,8 @@ class SopService {
 
     const procurementInputs = await SopModel.getProcurementInputs();
 
+    const shipmentInputs = await SopModel.getShipmentExecutionInputs();
+
     await SopModel.deleteRecommendationsByCycleId(cycleId);
 
     const recommendations = [];
@@ -124,16 +126,17 @@ class SopService {
       const procurement = procurementInputs.find(
         (p) => p.product_id === item.product_id,
       );
+      const shipment = procurement
+        ? shipmentInputs.find(
+            (s) => s.procurement_plan_id === procurement.procurement_plan_id,
+          )
+        : null;
 
       const generated = generateSopRecommendations({
         forecastDemand: Number(item.forecast_demand_units),
-
         openingInventory: Number(item.opening_inventory_units),
-
         productionCapacity: Number(item.production_capacity_units),
-
         plannedProduction: Number(item.planned_production_units),
-
         projectedEndingInventory: Number(item.projected_ending_inventory),
 
         requiredFabric: procurement ? Number(procurement.required_fabric_m) : 0,
@@ -147,6 +150,14 @@ class SopService {
         planningWeekNumber: procurement
           ? Number(procurement.planning_week.replace("W", ""))
           : 0,
+
+        // E2 shipment information
+        plannedArrival: shipment?.planned_arrival ?? null,
+        currentEta: shipment?.current_eta ?? null,
+        shipmentStatus: shipment?.shipment_status ?? null,
+        truckStatus: shipment?.truck_status ?? null,
+        plannedQuantity: shipment?.planned_quantity_m ?? null,
+        receivedQuantity: shipment?.received_quantity_m ?? null,
       });
 
       for (const recommendation of generated) {

@@ -399,10 +399,49 @@ class SopModel {
     return result.rows[0];
   }
 
+  // E2 shipment + truck execution data
+  static async getShipmentExecutionInputs() {
+    const query = `
+    SELECT
+      s.procurement_plan_id,
+      s.shipment_reference,
+      s.status AS shipment_status,
+      s.planned_arrival,
+      s.planned_quantity_m,
+      s.received_quantity_m,
+
+      t.id AS truck_id,
+      t.trailer_id,
+      t.tracking_number,
+      t.status AS truck_status,
+      t.current_yard_name,
+      t.current_location,
+      t.latitude,
+      t.longitude,
+      t.current_eta
+
+    FROM e2.shipments s
+
+    LEFT JOIN e2.trucks t
+      ON t.shipment_id = s.id
+
+    WHERE s.procurement_plan_id IS NOT NULL
+
+    ORDER BY
+      s.procurement_plan_id,
+      s.shipment_reference
+  `;
+
+    const result = await pool.query(query);
+
+    return result.rows;
+  }
+
   //procurement
   static async getProcurementInputs() {
     const query = `
     SELECT
+      pp.id AS procurement_plan_id,
       pp.product_id,
       pp.planning_week,
       pp.required_fabric_m,

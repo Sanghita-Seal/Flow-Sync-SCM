@@ -1,6 +1,7 @@
 import pool from "../../../common/config/database.js";
 
 class ProcurementModel {
+
   static async getProcurement({
     sku,
     week,
@@ -69,7 +70,6 @@ class ProcurementModel {
     `;
 
     const result = await pool.query(query, values);
-
     return result.rows;
   }
 
@@ -107,7 +107,6 @@ class ProcurementModel {
     `;
 
     const result = await pool.query(query, [productId]);
-
     return result.rows;
   }
 
@@ -125,7 +124,6 @@ class ProcurementModel {
     `;
 
     const result = await pool.query(query);
-
     return result.rows[0];
   }
 
@@ -172,9 +170,83 @@ class ProcurementModel {
     `;
 
     const result = await pool.query(query);
-
     return result.rows;
   }
+
+  // ============================================================
+  // Get P2 procurement plan + linked E2 shipments + truck data
+  // ============================================================
+  static async getProcurementPlanShipments(procurementPlanId) {
+    const query = `
+      SELECT
+        pp.id AS procurement_plan_id,
+        pp.sop_cycle_id,
+        pp.product_id,
+        pp.fabric_id,
+
+        p.sku_code,
+        p.name AS product_name,
+
+        f.fabric_code,
+        f.name AS fabric_name,
+
+        s.supplier_code,
+        s.name AS supplier_name,
+
+        pp.planning_week,
+        pp.required_fabric_m,
+        pp.moq_meters,
+        pp.recommended_order_qty_m,
+        pp.lead_time_weeks,
+        pp.risk_level,
+        pp.status AS procurement_status,
+
+        sh.id AS shipment_id,
+        sh.shipment_reference,
+        sh.origin,
+        sh.destination,
+        sh.status AS shipment_status,
+        sh.procurement_plan_id,
+        sh.planned_arrival,
+        sh.planned_arrival,
+        sh.planned_quantity_m,
+        sh.received_quantity_m,
+
+        t.id AS truck_id,
+        t.trailer_id,
+        t.tracking_number,
+        t.status AS truck_status,
+        t.current_eta,
+        t.current_location,
+        t.latitude,
+        t.longitude
+
+      FROM p2.procurement_plans pp
+
+      JOIN p2.products p
+        ON p.id = pp.product_id
+
+      JOIN p2.fabrics f
+        ON f.id = pp.fabric_id
+
+      LEFT JOIN p2.suppliers s
+        ON s.id = f.supplier_id
+
+      LEFT JOIN e2.shipments sh
+        ON sh.procurement_plan_id = pp.id
+
+      LEFT JOIN e2.trucks t
+        ON t.shipment_id = sh.id
+
+      WHERE pp.id = $1
+
+      ORDER BY sh.shipment_reference;
+    `;
+
+    const result = await pool.query(query, [procurementPlanId]);
+    return result.rows;
+  }
+
 }
 
 export default ProcurementModel;
