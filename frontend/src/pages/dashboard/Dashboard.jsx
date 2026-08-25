@@ -11,9 +11,8 @@ import { getOverview } from "../../features/e2/overview/overview.service";
 const E2_MODULES = [
   { name: "Trucks", description: "Live location and status of every truck in transit.", icon: Truck, to: "/e2/trucks" },
   { name: "Shipments", description: "Track shipments from dispatch through to arrival.", icon: Package, to: "/e2/shipments" },
-  { name: "Docks", description: "Dock availability across all yards.", icon: Dock, to: "/e2/docks" },
-  { name: "Yard", description: "Yard zone occupancy and staging status.", icon: Yard, to: "/e2/yard" },
-  { name: "Alerts", description: "Operational exceptions across warehouse execution.", icon: Alert, to: null },
+  { name: "Yard & Docks", description: "Yard occupancy and dock-level status, grouped by facility.", icon: Dock, to: "/e2/yard" },
+  { name: "Alerts", description: "Operational exceptions across warehouse execution.", icon: Alert, to: "/alerts" },
 ];
 
 const P2_MODULES = [

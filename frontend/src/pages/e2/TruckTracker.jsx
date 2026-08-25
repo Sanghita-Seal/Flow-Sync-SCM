@@ -28,6 +28,22 @@ export default function TruckTracker() {
       t.trailerId.toLowerCase().includes(q)
     );
   });
+  
+useEffect(() => {
+  const q = query.trim().toLowerCase();
+
+  if (!q) return;
+
+  const exactMatch = trucks.find(
+    (t) =>
+      t.truckId?.toLowerCase() === q ||
+      t.trailerId?.toLowerCase() === q
+  );
+
+  if (exactMatch) {
+    setSelectedId(exactMatch.truckId);
+  }
+}, [query, trucks]);
 
   const selectedTruck = trucks.find((t) => t.truckId === selectedId) || null;
 

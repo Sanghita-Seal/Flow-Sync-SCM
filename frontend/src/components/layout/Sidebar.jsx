@@ -3,9 +3,8 @@ import { NavLink } from "react-router-dom";
 const NAV_ITEMS = [
   { to: "/", label: "Overview" },
   { to: "/e2/trucks", label: "Trucks" },
-  { to: "/e2/yard", label: "Yard" },
-  { to: "/e2/docks", label: "Docks" },
-  { to: "/e2/deliveries", label: "Deliveries" },
+  { to: "/e2/yard", label: "Yard & Docks" },
+  { to: "/e2/shipments", label: "Shipments" },
   { to: "/alerts", label: "Alerts" },
   // P2 items added once that feature is built:
   // { to: "/p2/sop", label: "S&OP" },
