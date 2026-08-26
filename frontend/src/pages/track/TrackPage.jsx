@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import PublicLayout from "../../layouts/PublicLayout";
 import StatusBadge from "../../components/ui/StatusBadge";
 import { getTrucks } from "../../features/e2/trucks/truck.service";
+import useTruckSimulation from "../../hooks/useTruckSimulation";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -29,16 +30,31 @@ function truckIcon(status) {
   });
 }
 
+function ZoomToTruck({ position }) {
+  const map = useMap();
+  useEffect(() => {
+    if (position) {
+      map.setView(position, 14, { animate: true, duration: 0.8 });
+    }
+  }, [position, map]);
+  return null;
+}
+
 export default function TrackPage() {
   const [input, setInput] = useState("");
   const [truck, setTruck] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Auto-simulate for IN_TRANSIT trucks
+  const shouldSimulate = truck && truck.status === "IN_TRANSIT";
+  const { position } = useTruckSimulation(truck, shouldSimulate);
+
   async function handleTrack() {
     if (!input.trim()) return;
     setLoading(true);
     setNotFound(false);
+    setTruck(null);
     try {
       const all = await getTrucks();
       const found = all.find((t) => t.truckId.toUpperCase() === input.trim().toUpperCase());
@@ -52,8 +68,11 @@ export default function TrackPage() {
     }
   }
 
-  const hasCoords = truck && truck.latitude && truck.longitude &&
-    !isNaN(Number(truck.latitude)) && Number(truck.latitude) !== 0;
+  // Use simulated position if available, otherwise use API coords
+  const displayLat = position ? position.latitude : truck ? Number(truck.latitude) : 0;
+  const displayLng = position ? position.longitude : truck ? Number(truck.longitude) : 0;
+
+  const hasCoords = displayLat !== 0 && displayLng !== 0 && !isNaN(displayLat) && !isNaN(displayLng);
 
   return (
     <PublicLayout>
@@ -83,16 +102,17 @@ export default function TrackPage() {
         <div className="rounded-card border border-border bg-page shadow-card overflow-hidden">
           {/* Map */}
           {hasCoords ? (
-            <div className="h-64">
+            <div className="relative h-72">
               <MapContainer
-                center={[Number(truck.latitude), Number(truck.longitude)]}
-                zoom={12}
+                center={[displayLat, displayLng]}
+                zoom={14}
                 style={{ height: "100%", width: "100%" }}
                 scrollWheelZoom={false}
               >
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
+                <ZoomToTruck position={[displayLat, displayLng]} />
                 <Marker
-                  position={[Number(truck.latitude), Number(truck.longitude)]}
+                  position={[displayLat, displayLng]}
                   icon={truckIcon(truck.status)}
                 >
                   <Popup>
@@ -101,6 +121,14 @@ export default function TrackPage() {
                   </Popup>
                 </Marker>
               </MapContainer>
+
+              {/* Simulation badge */}
+              {shouldSimulate && position && (
+                <div className="absolute top-3 right-3 z-[1000] bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-medium px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                  Live tracking
+                </div>
+              )}
             </div>
           ) : (
             <div className="h-48 bg-surface flex items-center justify-center text-sm text-faint">
