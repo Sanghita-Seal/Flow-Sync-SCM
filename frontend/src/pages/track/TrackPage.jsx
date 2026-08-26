@@ -69,7 +69,7 @@ export default function TrackPage() {
       }));
       const q = input.trim().toUpperCase();
       const found = enriched.find(
-        (t) => t.truckId.toUpperCase() === q || t.trailerId.toUpperCase() === q || t.shipmentRef.toUpperCase() === q
+        (t) => t.truckId.toUpperCase() === q || t.trailerId.toUpperCase() === q || t.shipmentId?.toUpperCase() === q
       );
       if (found) setTruck(found);
       else { setTruck(null); setNotFound(true); }
@@ -99,7 +99,7 @@ export default function TrackPage() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleTrack()}
-          placeholder="e.g. TRK-001, TRAILER-001, or SHP-001"
+          placeholder="e.g. TRK-001, TRAILER-001, or shipment UUID"
           className="flex-1 rounded-node border border-border bg-page px-3 py-2.5 text-sm text-ink placeholder:text-faint outline-none focus:border-primary focus:ring-2 focus:ring-primary-soft"
         />
         <button

@@ -37,7 +37,7 @@ export default function TruckTracker() {
     return (
       t.truckId.toLowerCase().includes(q) ||
       t.trailerId.toLowerCase().includes(q) ||
-      t.shipmentRef.toLowerCase().includes(q)
+      t.shipmentId?.toLowerCase().includes(q)
     );
   });
 
@@ -46,7 +46,7 @@ export default function TruckTracker() {
     if (!q) return;
 
     const exactMatch = trucks.find(
-      (t) => t.truckId?.toLowerCase() === q || t.trailerId?.toLowerCase() === q || t.shipmentRef?.toLowerCase() === q
+      (t) => t.truckId?.toLowerCase() === q || t.trailerId?.toLowerCase() === q || t.shipmentId?.toLowerCase() === q
     );
 
     if (exactMatch) {

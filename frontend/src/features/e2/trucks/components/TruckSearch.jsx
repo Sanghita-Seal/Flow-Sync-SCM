@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function TruckSearch({ onSearch, placeholder = "Search by tracking number, trailer ID, or shipment reference (e.g. TRK-001, TRAILER-001, SHP-001)" }) {
+export default function TruckSearch({ onSearch, placeholder = "Search by tracking number, trailer ID, or shipment reference (e.g. TRK-001, TRAILER-001, or UUID)" }) {
   const [value, setValue] = useState("");
 
   function handleChange(e) {
