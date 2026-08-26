@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { Truck, Package, Dock, AlertTriangle, Calendar, ShoppingCart, Shield, Lightbulb, Container, Warehouse, BarChart3, TrendingUp } from "lucide-react";
+import { Truck, Package, Dock, AlertTriangle, Calendar, ShoppingCart, Shield, Lightbulb, Container, Warehouse, BarChart3, TrendingUp, Wifi } from "lucide-react";
 import PageWrapper from "../../components/layout/PageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
@@ -95,6 +95,11 @@ export default function Dashboard() {
       description="Visibility across supply-chain planning and warehouse execution, in one place."
       actions={
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+            <Wifi size={12} />
+            <span className="font-medium">WMS Connected</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          </div>
           {selectedCycle && (
             <Badge variant="blue">{selectedCycle.cycle_name || selectedCycle.name}</Badge>
           )}

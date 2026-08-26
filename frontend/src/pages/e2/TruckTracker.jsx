@@ -1,12 +1,16 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
+import { motion } from "motion/react";
+import { AlertTriangle } from "lucide-react";
 import PageWrapper from "../../components/layout/PageWrapper";
 import TruckSearch from "../../features/e2/trucks/components/TruckSearch";
 import TruckMap from "../../features/e2/trucks/components/TruckMap";
 import TruckDetails from "../../features/e2/trucks/components/TruckDetails";
+import ArrivalWindows from "../../features/e2/trucks/components/ArrivalWindows";
 import StatusBadge from "../../components/ui/StatusBadge";
 import { getTrucks } from "../../features/e2/trucks/truck.service";
 import { getShipments } from "../../features/e2/shipments/shipment.service";
 import useTruckSimulation from "../../hooks/useTruckSimulation";
+import useYardAlerts from "../../hooks/useYardAlerts";
 
 export default function TruckTracker() {
   const [trucks, setTrucks] = useState([]);
@@ -31,6 +35,8 @@ export default function TruckTracker() {
       .finally(() => setLoading(false));
   }, []);
 
+  const yardWarnings = useYardAlerts(trucks);
+
   const filtered = trucks.filter((t) => {
     const q = query.trim().toLowerCase();
     if (!q) return true;
@@ -44,27 +50,36 @@ export default function TruckTracker() {
   useEffect(() => {
     const q = query.trim().toLowerCase();
     if (!q) return;
-
     const exactMatch = trucks.find(
       (t) => t.truckId?.toLowerCase() === q || t.trailerId?.toLowerCase() === q || t.shipmentId?.toLowerCase() === q
     );
-
-    if (exactMatch) {
-      setSelectedId(exactMatch.truckId);
-    }
+    if (exactMatch) setSelectedId(exactMatch.truckId);
   }, [query, trucks]);
 
   const selectedTruck = trucks.find((t) => t.truckId === selectedId) || null;
-
-  // Auto-simulate: run only for IN_TRANSIT trucks
   const shouldSimulate = selectedTruck && selectedTruck.status === "IN_TRANSIT";
   const { position } = useTruckSimulation(selectedTruck, shouldSimulate);
 
   return (
     <PageWrapper title="E2 — Truck Tracker" description="Warehouse operations view — search, track, and monitor every truck in the network.">
       <div className="mb-4">
-        <TruckSearch onSearch={setQuery} />
+        <TruckSearch onSearch={setQuery} loading={loading} />
       </div>
+
+      {/* Yard Warnings */}
+      {yardWarnings.length > 0 && (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
+          <div className="flex items-center gap-2 mb-1">
+            <AlertTriangle size={14} className="text-amber-600" />
+            <span className="text-xs font-semibold text-amber-800">Yard Alerts</span>
+          </div>
+          <div className="space-y-1">
+            {yardWarnings.map((w, i) => (
+              <p key={i} className="text-xs text-amber-700">{w.message}</p>
+            ))}
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="text-sm text-slate-500 py-8 text-center">Loading trucks...</div>
@@ -82,6 +97,13 @@ export default function TruckTracker() {
             <TruckDetails truck={selectedTruck} />
           </div>
 
+          {/* Arrival Windows */}
+          <div className="mb-6">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Arrival Windows</h3>
+            <ArrivalWindows trucks={filtered} onSelectTruck={setSelectedId} />
+          </div>
+
+          {/* Truck Table */}
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             <table className="w-full border-collapse text-sm">
               <thead>
@@ -96,13 +118,13 @@ export default function TruckTracker() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((t) => (
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={7} className="text-center py-8 text-slate-400">No trucks found.</td></tr>
+                ) : filtered.map((t) => (
                   <tr
                     key={t.truckId}
                     onClick={() => setSelectedId(t.truckId)}
-                    className={`cursor-pointer border-t border-slate-100 ${
-                      t.truckId === selectedId ? "bg-blue-50" : "hover:bg-slate-50"
-                    }`}
+                    className={`cursor-pointer border-t border-slate-100 ${t.truckId === selectedId ? "bg-blue-50" : "hover:bg-slate-50"}`}
                   >
                     <td className="px-4 py-3 text-slate-900 font-medium">{t.truckId}</td>
                     <td className="px-4 py-3 text-xs text-slate-500 font-mono">{t.shipmentRef || "—"}</td>

@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { LayoutDashboard, Truck, Bell, Calendar, ShoppingCart, Shield, Lightbulb, Warehouse, Container, BarChart3, Package, X } from "lucide-react";
+import { LayoutDashboard, Truck, Bell, Calendar, ShoppingCart, Shield, Lightbulb, Warehouse, Container, BarChart3, Package, Anchor, X } from "lucide-react";
 import { useSidebar } from "../../context/SidebarContext";
 
 const NAV_SECTIONS = [
@@ -11,6 +11,7 @@ const NAV_SECTIONS = [
       { to: "/e2/shipments", label: "Shipments", icon: Container },
       { to: "/e2/trucks", label: "Trucks", icon: Truck },
       { to: "/e2/yard", label: "Yard & Docks", icon: Warehouse },
+      { to: "/e2/docks", label: "Dock Assignments", icon: Anchor },
       { to: "/alerts", label: "Alerts", icon: Bell },
     ],
   },

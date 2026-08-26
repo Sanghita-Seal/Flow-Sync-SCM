@@ -49,7 +49,7 @@ export default function DockAssignments({ assignments, loading }) {
               <td className="px-4 py-2.5 text-slate-700 hidden sm:table-cell">{a.yard_name}</td>
               <td className="px-4 py-2.5"><Badge variant={PRIORITY_VARIANT[a.priority] || "amber"}>{a.priority}</Badge></td>
               <td className="px-4 py-2.5 hidden md:table-cell"><Badge variant={a.truck_status === "DELAYED" ? "rose" : "blue"}>{a.truck_status}</Badge></td>
-              <td className="px-4 py-2.5 text-slate-700 hidden md:table-cell">{a.current_eta ? new Date(a.current_eta).toLocaleDateString() : "—"}</td>
+              <td className="px-4 py-2.5 text-slate-700 hidden md:table-cell">{a.current_eta ? new Date(a.current_eta).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—"}</td>
             </motion.tr>
           ))}
         </tbody>
