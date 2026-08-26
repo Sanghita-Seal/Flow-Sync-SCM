@@ -182,7 +182,7 @@ export default function P2Overview() {
                 <div className="space-y-4">
                   {[
                     { label: "Forecast Demand", value: overview.metrics.totalForecastDemand, fill: "#3b82f6" },
-                    { label: "Capacity + Inventory", value: overview.metrics.productionCapacity + overview.metrics.availableInventory, fill: "#10b981" },
+                    { label: "Capacity + Inventory", value: overview.metrics.productionCapacity + overview.metrics.availableInventory, fill: gapPercent < 100 ? "#ef4444" : "#10b981" },
                   ].map((item) => (
                     <div key={item.label} className="flex items-center gap-4">
                       <span className="text-sm text-slate-600 w-40">{item.label}</span>
@@ -199,7 +199,7 @@ export default function P2Overview() {
                     </div>
                   ))}
                   <div className="text-xs text-slate-500 pt-2">
-                    Coverage: <span className="font-semibold text-slate-700">{gapPercent}%</span>
+                    Coverage: <span className={`font-semibold ${gapPercent < 100 ? "text-red-600" : "text-emerald-600"}`}>{gapPercent}%</span>
                   </div>
                 </div>
               </CardContent>
