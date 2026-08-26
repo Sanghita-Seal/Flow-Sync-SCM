@@ -1,4 +1,5 @@
 import { UserButton, useAuth } from "@clerk/clerk-react";
+import { Link } from "react-router-dom";
 import { useSidebar } from "../../context/SidebarContext";
 import { Bell, Menu } from "../ui/Icons";
 
@@ -16,10 +17,10 @@ export default function Navbar() {
         >
           <Menu width={20} height={20} />
         </button>
-        <div>
-          <h1 className="text-base font-semibold text-slate-900">SCM Control Tower</h1>
+        <Link to="/" className="block">
+          <h1 className="text-base font-semibold text-slate-900 hover:text-blue-600 transition-colors">SCM Control Tower</h1>
           <p className="text-xs text-slate-600 hidden sm:block">Supply chain visibility &amp; planning</p>
-        </div>
+        </Link>
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
