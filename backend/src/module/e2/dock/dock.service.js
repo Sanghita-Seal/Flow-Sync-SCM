@@ -23,6 +23,11 @@ class DockService {
   static async getDocksByStatus(status) {
     return await DockModel.getDocksByStatus(status);
   }
+
+  // Assign docks to eligible arrived trucks
+  static async assignDocks() {
+    return await DockModel.assignDocks();
+  }
 }
 
 export default DockService;

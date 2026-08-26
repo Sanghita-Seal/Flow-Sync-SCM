@@ -42,6 +42,21 @@ class DockController {
       next(error);
     }
   }
+
+  // POST /api/e2/docks/assign
+  static async assignDocks(req, res, next) {
+    try {
+      const result = await DockService.assignDocks();
+
+      return ApiResponse.ok(
+        res,
+        result,
+        "Dock assignment process completed"
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default DockController;
