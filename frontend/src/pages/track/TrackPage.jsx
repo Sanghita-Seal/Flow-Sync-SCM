@@ -69,7 +69,7 @@ export default function TrackPage() {
       }));
       const q = input.trim().toUpperCase();
       const found = enriched.find(
-        (t) => t.truckId.toUpperCase() === q || t.shipmentRef.toUpperCase() === q
+        (t) => t.truckId.toUpperCase() === q || t.trailerId.toUpperCase() === q || t.shipmentRef.toUpperCase() === q
       );
       if (found) setTruck(found);
       else { setTruck(null); setNotFound(true); }
