@@ -14,7 +14,7 @@ export default function PublicLayout({ children }) {
         </Link>
       </header>
       <main className="flex-1 flex items-start justify-center p-6 pt-12">
-        <div className="w-full max-w-md">{children}</div>
+        <div className="w-full max-w-3xl">{children}</div>
       </main>
     </div>
   );
