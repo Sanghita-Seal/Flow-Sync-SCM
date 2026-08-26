@@ -4,6 +4,7 @@ import LandingPage from "../pages/landing/LandingPage";
 import Dashboard from "../pages/dashboard/Dashboard";
 import TruckTracker from "../pages/e2/TruckTracker";
 import YardDocks from "../pages/e2/YardDocks";
+import E2Overview from "../pages/e2/E2Overview";
 import Shipments from "../pages/e2/Shipments";
 import ShipmentDetail from "../pages/e2/ShipmentDetail";
 import Alerts from "../pages/alerts/Alerts";
@@ -14,7 +15,6 @@ import ProcurementPlans from "../pages/p2/ProcurementPlans";
 import ProcurementPlanDetail from "../pages/p2/ProcurementPlanDetail";
 import RiskMonitor from "../pages/p2/RiskMonitor";
 import Recommendations from "../pages/p2/Recommendations";
-import P2Overview from "../pages/p2/P2Overview";
 
 export default function AppRoutes({ ManagerGuard, AuthGate }) {
   return (
@@ -26,12 +26,12 @@ export default function AppRoutes({ ManagerGuard, AuthGate }) {
       {/* Protected routes — must be signed in AND have manager role */}
       <Route element={<AuthGate><ManagerGuard><MainLayout /></ManagerGuard></AuthGate>}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/e2" element={<E2Overview />} />
         <Route path="/e2/trucks" element={<TruckTracker />} />
         <Route path="/e2/yard" element={<YardDocks />} />
         <Route path="/e2/shipments" element={<Shipments />} />
         <Route path="/e2/shipments/:reference" element={<ShipmentDetail />} />
         <Route path="/alerts" element={<Alerts />} />
-        <Route path="/p2/overview" element={<P2Overview />} />
         <Route path="/p2/sop" element={<SopCycles />} />
         <Route path="/p2/procurement" element={<ProcurementPlans />} />
         <Route path="/p2/procurement/:planId" element={<ProcurementPlanDetail />} />
