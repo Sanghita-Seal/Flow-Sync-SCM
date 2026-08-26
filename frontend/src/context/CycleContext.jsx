@@ -19,6 +19,9 @@ export function CycleProvider({ children }) {
           setSelectedCycleId(data[0].id);
         }
       })
+      .catch((err) => {
+        console.error("Failed to load cycles:", err);
+      })
       .finally(() => setLoading(false));
   }, []);
 
