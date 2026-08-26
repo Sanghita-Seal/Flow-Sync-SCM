@@ -42,28 +42,6 @@ function ZoomToTruck({ position }) {
   return null;
 }
 
-function TruckMarker({ truck, isSelected, onSelect }) {
-  const map = useMap();
-  const lat = Number(truck.latitude);
-  const lng = Number(truck.longitude);
-
-  if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return null;
-
-  return (
-    <Marker
-      position={[lat, lng]}
-      icon={isSelected ? selectedTruckIcon(truck.status) : truckIcon(truck.status)}
-      eventHandlers={{ click: () => onSelect(truck.truckId || truck.id) }}
-    >
-      <Popup>
-        <strong>{truck.truckId || truck.id}</strong>
-        <div>{truck.status}</div>
-        {truck.locationLabel && <div style={{ fontSize: "11px", color: "#64748b" }}>{truck.locationLabel}</div>}
-      </Popup>
-    </Marker>
-  );
-}
-
 export default function TruckMap({ trucks, selectedId, onSelect, center = [22.9, 88.0], simulatedPosition }) {
   const selectedTruck = selectedId ? trucks.find((t) => (t.truckId || t.id) === selectedId) : null;
   const visibleTrucks = selectedTruck ? [selectedTruck] : trucks;
@@ -79,7 +57,7 @@ export default function TruckMap({ trucks, selectedId, onSelect, center = [22.9,
     displayPosition[0] !== 0 && displayPosition[1] !== 0;
 
   return (
-    <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm relative">
+    <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
       <MapContainer
         center={hasValidPosition ? displayPosition : center}
         zoom={hasValidPosition ? 14 : 8}
@@ -105,22 +83,31 @@ export default function TruckMap({ trucks, selectedId, onSelect, center = [22.9,
                   <strong>{id}</strong>
                   <div>{t.status}</div>
                   {t.locationLabel && <div style={{ fontSize: "11px", color: "#64748b" }}>{t.locationLabel}</div>}
-                  <div style={{ fontSize: "10px", color: "#6366f1", marginTop: "2px" }}>GPS Simulation</div>
                 </Popup>
               </Marker>
             );
           }
 
-          return <TruckMarker key={id} truck={t} isSelected={isSelected} onSelect={onSelect} />;
+          const lat = Number(t.latitude);
+          const lng = Number(t.longitude);
+          if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return null;
+
+          return (
+            <Marker
+              key={id}
+              position={[lat, lng]}
+              icon={isSelected ? selectedTruckIcon(t.status) : truckIcon(t.status)}
+              eventHandlers={{ click: () => onSelect(id) }}
+            >
+              <Popup>
+                <strong>{id}</strong>
+                <div>{t.status}</div>
+                {t.locationLabel && <div style={{ fontSize: "11px", color: "#64748b" }}>{t.locationLabel}</div>}
+              </Popup>
+            </Marker>
+          );
         })}
       </MapContainer>
-
-      {simulatedPosition && (
-        <div className="absolute top-3 right-3 z-[1000] bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-medium px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-          GPS Simulation
-        </div>
-      )}
     </div>
   );
 }

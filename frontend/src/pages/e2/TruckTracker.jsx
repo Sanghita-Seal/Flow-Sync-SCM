@@ -12,7 +12,6 @@ export default function TruckTracker() {
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isSimulating, setIsSimulating] = useState(false);
 
   useEffect(() => {
     getTrucks()
@@ -43,16 +42,10 @@ export default function TruckTracker() {
   }, [query, trucks]);
 
   const selectedTruck = trucks.find((t) => t.truckId === selectedId) || null;
-  const { position, hasGps } = useTruckSimulation(selectedTruck, isSimulating);
 
-  const handleSelect = useCallback((truckId) => {
-    setSelectedId(truckId);
-    setIsSimulating(false);
-  }, []);
-
-  const toggleSimulation = useCallback(() => {
-    setIsSimulating((prev) => !prev);
-  }, []);
+  // Auto-simulate: run only for IN_TRANSIT trucks
+  const shouldSimulate = selectedTruck && selectedTruck.status === "IN_TRANSIT";
+  const { position } = useTruckSimulation(selectedTruck, shouldSimulate);
 
   return (
     <PageWrapper title="E2 — Truck Tracker" description="Warehouse operations view — search, track, and monitor every truck in the network.">
@@ -69,16 +62,11 @@ export default function TruckTracker() {
               <TruckMap
                 trucks={filtered}
                 selectedId={selectedId}
-                onSelect={handleSelect}
-                simulatedPosition={isSimulating && position ? position : null}
+                onSelect={setSelectedId}
+                simulatedPosition={shouldSimulate && position ? position : null}
               />
             </div>
-            <TruckDetails
-              truck={selectedTruck}
-              isSimulating={isSimulating}
-              onToggleSimulation={toggleSimulation}
-              hasGps={hasGps}
-            />
+            <TruckDetails truck={selectedTruck} />
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -97,7 +85,7 @@ export default function TruckTracker() {
                 {filtered.map((t) => (
                   <tr
                     key={t.truckId}
-                    onClick={() => handleSelect(t.truckId)}
+                    onClick={() => setSelectedId(t.truckId)}
                     className={`cursor-pointer border-t border-slate-100 ${
                       t.truckId === selectedId ? "bg-blue-50" : "hover:bg-slate-50"
                     }`}
