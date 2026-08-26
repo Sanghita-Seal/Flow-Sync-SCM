@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
+import Home from "../pages/Home";
 import Dashboard from "../pages/dashboard/Dashboard";
 import TruckTracker from "../pages/e2/TruckTracker";
 import YardDocks from "../pages/e2/YardDocks";
@@ -14,27 +15,27 @@ import ProcurementPlanDetail from "../pages/p2/ProcurementPlanDetail";
 import RiskMonitor from "../pages/p2/RiskMonitor";
 import Recommendations from "../pages/p2/Recommendations";
 
-export default function AppRoutes() {
+export default function AppRoutes({ ManagerGuard, AuthGate }) {
   return (
     <Routes>
+      {/* Public routes */}
+      <Route path="/" element={<Home />} />
       <Route path="/track" element={<TrackPage />} />
 
-      {/* Main Dashboard */}
-      <Route path="/" element={<MainLayout><Dashboard /></MainLayout>} />
-
-      {/* E2 — Execution */}
-      <Route path="/e2/trucks" element={<MainLayout><TruckTracker /></MainLayout>} />
-      <Route path="/e2/yard" element={<MainLayout><YardDocks /></MainLayout>} />
-      <Route path="/e2/shipments" element={<MainLayout><Shipments /></MainLayout>} />
-      <Route path="/e2/shipments/:reference" element={<MainLayout><ShipmentDetail /></MainLayout>} />
-      <Route path="/alerts" element={<MainLayout><Alerts /></MainLayout>} />
-
-      {/* P2 — Planning */}
-      <Route path="/p2/sop" element={<MainLayout><SopCycles /></MainLayout>} />
-      <Route path="/p2/procurement" element={<MainLayout><ProcurementPlans /></MainLayout>} />
-      <Route path="/p2/procurement/:planId" element={<MainLayout><ProcurementPlanDetail /></MainLayout>} />
-      <Route path="/p2/risk" element={<MainLayout><RiskMonitor /></MainLayout>} />
-      <Route path="/p2/recommendations" element={<MainLayout><Recommendations /></MainLayout>} />
+      {/* Protected routes — must be signed in */}
+      <Route element={<AuthGate><MainLayout /></AuthGate>}>
+        <Route path="/dashboard" element={<ManagerGuard><Dashboard /></ManagerGuard>} />
+        <Route path="/e2/trucks" element={<TruckTracker />} />
+        <Route path="/e2/yard" element={<YardDocks />} />
+        <Route path="/e2/shipments" element={<Shipments />} />
+        <Route path="/e2/shipments/:reference" element={<ShipmentDetail />} />
+        <Route path="/alerts" element={<Alerts />} />
+        <Route path="/p2/sop" element={<SopCycles />} />
+        <Route path="/p2/procurement" element={<ProcurementPlans />} />
+        <Route path="/p2/procurement/:planId" element={<ProcurementPlanDetail />} />
+        <Route path="/p2/risk" element={<RiskMonitor />} />
+        <Route path="/p2/recommendations" element={<Recommendations />} />
+      </Route>
     </Routes>
   );
 }

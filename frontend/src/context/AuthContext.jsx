@@ -1,17 +1,21 @@
 import { createContext, useContext } from "react";
+import { useUser, useAuth as useClerkAuth } from "@clerk/clerk-react";
 
-// STUB — auth is not wired up yet (Neon Auth will replace this later).
-// Always reports a logged-in placeholder user so the rest of the app
-// can be built and tested now without waiting on real authentication.
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const { user, isLoaded } = useUser();
+  const { isSignedIn, signOut } = useClerkAuth();
+
+  const role = user?.publicMetadata?.role || "user";
+
   const value = {
-    user: { name: "Guest", email: "guest@example.com" },
-    isAuthenticated: true, // hardcoded true until Neon Auth is wired in
-    isLoading: false,
-    login: () => {},
-    logout: () => {},
+    user: user ? { name: user.fullName || user.firstName || "User", email: user.primaryEmailAddress?.emailAddress || "" } : null,
+    isLoaded,
+    isAuthenticated: isSignedIn,
+    isManager: role === "manager",
+    role,
+    logout: () => signOut(),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
