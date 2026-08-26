@@ -13,7 +13,7 @@ class ShipmentModel {
         status,
         procurement_plan_id,
         planned_arrival,
-        actual_arrival,
+
         planned_quantity_m,
         received_quantity_m
       FROM e2.shipments
@@ -35,7 +35,6 @@ class ShipmentModel {
         status,
         procurement_plan_id,
         planned_arrival,
-        actual_arrival,
         planned_quantity_m,
         received_quantity_m
       FROM e2.shipments
@@ -57,7 +56,7 @@ class ShipmentModel {
         status,
         procurement_plan_id,
         planned_arrival,
-        actual_arrival,
+        
         planned_quantity_m,
         received_quantity_m
       FROM e2.shipments
@@ -80,7 +79,7 @@ class ShipmentModel {
         status,
         procurement_plan_id,
         planned_arrival,
-        actual_arrival,
+        
         planned_quantity_m,
         received_quantity_m
       FROM e2.shipments
