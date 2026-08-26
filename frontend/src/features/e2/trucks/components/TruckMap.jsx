@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -32,79 +32,95 @@ function selectedTruckIcon(status) {
   });
 }
 
-/**
- * Zooms the map to the selected truck's position.
- */
 function ZoomToTruck({ position }) {
   const map = useMap();
-
   useEffect(() => {
     if (position) {
       map.setView(position, 14, { animate: true, duration: 0.8 });
     }
   }, [position, map]);
-
   return null;
 }
 
-/**
- * Real-world map showing truck positions.
- * When a truck is selected, only that truck is shown and the map zooms to it.
- */
-export default function TruckMap({ trucks, selectedId, onSelect, center = [22.9, 88.0] }) {
-  const selectedTruck = selectedId ? trucks.find((t) => (t.truckId || t.id) === selectedId) : null;
+function TruckMarker({ truck, isSelected, onSelect }) {
+  const map = useMap();
+  const lat = Number(truck.latitude);
+  const lng = Number(truck.longitude);
 
-  // Determine which trucks to show: only selected one, or all
-  const visibleTrucks = selectedTruck ? [selectedTruck] : trucks;
-
-  // Valid position for the selected truck
-  const selectedPosition = selectedTruck
-    ? [Number(selectedTruck.latitude), Number(selectedTruck.longitude)]
-    : null;
-
-  const hasValidPosition = selectedPosition &&
-    !isNaN(selectedPosition[0]) &&
-    !isNaN(selectedPosition[1]) &&
-    selectedPosition[0] !== 0 &&
-    selectedPosition[1] !== 0;
+  if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return null;
 
   return (
-    <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+    <Marker
+      position={[lat, lng]}
+      icon={isSelected ? selectedTruckIcon(truck.status) : truckIcon(truck.status)}
+      eventHandlers={{ click: () => onSelect(truck.truckId || truck.id) }}
+    >
+      <Popup>
+        <strong>{truck.truckId || truck.id}</strong>
+        <div>{truck.status}</div>
+        {truck.locationLabel && <div style={{ fontSize: "11px", color: "#64748b" }}>{truck.locationLabel}</div>}
+      </Popup>
+    </Marker>
+  );
+}
+
+export default function TruckMap({ trucks, selectedId, onSelect, center = [22.9, 88.0], simulatedPosition }) {
+  const selectedTruck = selectedId ? trucks.find((t) => (t.truckId || t.id) === selectedId) : null;
+  const visibleTrucks = selectedTruck ? [selectedTruck] : trucks;
+
+  const displayPosition = simulatedPosition
+    ? [simulatedPosition.latitude, simulatedPosition.longitude]
+    : selectedTruck
+      ? [Number(selectedTruck.latitude), Number(selectedTruck.longitude)]
+      : null;
+
+  const hasValidPosition = displayPosition &&
+    !isNaN(displayPosition[0]) && !isNaN(displayPosition[1]) &&
+    displayPosition[0] !== 0 && displayPosition[1] !== 0;
+
+  return (
+    <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm relative">
       <MapContainer
-        center={hasValidPosition ? selectedPosition : center}
+        center={hasValidPosition ? displayPosition : center}
         zoom={hasValidPosition ? 14 : 8}
         style={{ height: "440px", width: "100%" }}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
 
-        {/* Zoom to selected truck */}
-        {hasValidPosition && <ZoomToTruck position={selectedPosition} />}
+        {hasValidPosition && <ZoomToTruck position={displayPosition} />}
 
         {visibleTrucks.map((t) => {
           const id = t.truckId || t.id;
-          const lat = Number(t.latitude);
-          const lng = Number(t.longitude);
-
-          if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return null;
-
           const isSelected = id === selectedId;
 
-          return (
-            <Marker
-              key={id}
-              position={[lat, lng]}
-              icon={isSelected ? selectedTruckIcon(t.status) : truckIcon(t.status)}
-              eventHandlers={{ click: () => onSelect(id) }}
-            >
-              <Popup>
-                <strong>{id}</strong>
-                <div>{t.status}</div>
-                {t.locationLabel && <div style={{ fontSize: "11px", color: "#64748b" }}>{t.locationLabel}</div>}
-              </Popup>
-            </Marker>
-          );
+          if (isSelected && simulatedPosition) {
+            return (
+              <Marker
+                key={`sim-${id}`}
+                position={[simulatedPosition.latitude, simulatedPosition.longitude]}
+                icon={selectedTruckIcon(t.status)}
+                eventHandlers={{ click: () => onSelect(id) }}
+              >
+                <Popup>
+                  <strong>{id}</strong>
+                  <div>{t.status}</div>
+                  {t.locationLabel && <div style={{ fontSize: "11px", color: "#64748b" }}>{t.locationLabel}</div>}
+                  <div style={{ fontSize: "10px", color: "#6366f1", marginTop: "2px" }}>GPS Simulation</div>
+                </Popup>
+              </Marker>
+            );
+          }
+
+          return <TruckMarker key={id} truck={t} isSelected={isSelected} onSelect={onSelect} />;
         })}
       </MapContainer>
+
+      {simulatedPosition && (
+        <div className="absolute top-3 right-3 z-[1000] bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-medium px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+          GPS Simulation
+        </div>
+      )}
     </div>
   );
 }

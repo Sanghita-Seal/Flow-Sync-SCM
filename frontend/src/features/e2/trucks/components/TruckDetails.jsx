@@ -1,4 +1,6 @@
 import StatusBadge from "../../../../components/ui/StatusBadge";
+import { Button } from "../../../../components/ui/Button";
+import { Play, Pause } from "lucide-react";
 
 function Row({ label, children }) {
   return (
@@ -9,7 +11,9 @@ function Row({ label, children }) {
   );
 }
 
-export default function TruckDetails({ truck }) {
+export default function TruckDetails({ truck, isSimulating, onToggleSimulation, hasGps }) {
+  const canSimulate = hasGps && truck && truck.status !== "ARRIVED";
+
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 w-64 shrink-0 min-h-[220px] shadow-sm">
       <div className="text-xs text-slate-500 uppercase tracking-wide font-medium mb-3">Truck Detail</div>
@@ -25,6 +29,20 @@ export default function TruckDetails({ truck }) {
           <Row label="ETA">{truck.eta || truck.currentEta || "—"}</Row>
           <Row label="Progress">{truck.progress != null ? `${truck.progress}%` : "—"}</Row>
           <Row label="Destination">{truck.destination?.label || truck.destinationName || "—"}</Row>
+
+          {canSimulate ? (
+            <Button
+              variant={isSimulating ? "outline" : "default"}
+              size="sm"
+              className="w-full mt-2"
+              onClick={onToggleSimulation}
+            >
+              {isSimulating ? <Pause size={14} className="mr-1.5" /> : <Play size={14} className="mr-1.5" />}
+              {isSimulating ? "Pause" : "Simulate Movement"}
+            </Button>
+          ) : !hasGps ? (
+            <div className="text-xs text-slate-400 bg-slate-50 rounded-lg px-3 py-2 mt-2">No GPS data available</div>
+          ) : null}
         </div>
       ) : (
         <div className="text-sm text-slate-500">
