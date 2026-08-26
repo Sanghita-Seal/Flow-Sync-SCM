@@ -1,5 +1,5 @@
 import { useAuth } from "../../context/AuthContext";
-import Button from "../ui/Button";
+import { Button } from "../ui/Button";
 import { Bell, User } from "../ui/Icons";
 //import { Bell } from "../ui/Icons";
 //import { User } from "../ui/User"; // merge into Icons.jsx if you keep icons in one file

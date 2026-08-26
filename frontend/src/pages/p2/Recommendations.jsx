@@ -1,99 +1,93 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "motion/react";
 import PageWrapper from "../../components/layout/PageWrapper";
+import { Card, CardContent } from "../../components/ui/Card";
+import { Badge } from "../../components/ui/Badge";
+import { Button } from "../../components/ui/Button";
+import AnimatedCard from "../../components/ui/AnimatedCard";
 import { useCycle } from "../../context/CycleContext";
-import { getRecommendations, getRecommendationSummary } from "../../features/p2/sop/sop.service";
-import StatusBadge from "../../components/ui/StatusBadge";
+import { getRecommendations } from "../../features/p2/sop/sop.service";
 
-const SEVERITY_STYLES = {
-  HIGH: "bg-rose-50 border-rose-200",
-  MEDIUM: "bg-amber-50 border-amber-200",
-  LOW: "bg-emerald-50 border-emerald-200",
-  CRITICAL: "bg-rose-50 border-rose-200",
-};
-
-const SEVERITY_TEXT = {
-  HIGH: "text-rose-700",
-  MEDIUM: "text-amber-700",
-  LOW: "text-emerald-700",
-  CRITICAL: "text-rose-700",
+const SEVERITY_VARIANT = {
+  HIGH: "rose",
+  MEDIUM: "amber",
+  LOW: "emerald",
+  CRITICAL: "rose",
 };
 
 export default function Recommendations() {
   const navigate = useNavigate();
   const { selectedCycleId, loading: cycleLoading } = useCycle();
   const [recommendations, setRecommendations] = useState([]);
-  const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!selectedCycleId) return;
     setLoading(true);
-    Promise.all([
-      getRecommendations(selectedCycleId).catch(() => []),
-      getRecommendationSummary(selectedCycleId).catch(() => null),
-    ])
-      .then(([recs, summ]) => {
-        setRecommendations(recs);
-        setSummary(summ);
-      })
+    getRecommendations(selectedCycleId)
+      .then(setRecommendations)
+      .catch(() => setRecommendations([]))
       .finally(() => setLoading(false));
   }, [selectedCycleId]);
 
   return (
     <PageWrapper title="Recommendations" description="S&OP recommendations based on P2 planning and E2 execution.">
       {cycleLoading || loading ? (
-        <div className="text-sm text-slate-500 py-8 text-center">Loading recommendations...</div>
+        <div className="flex items-center justify-center py-16">
+          <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full" />
+        </div>
       ) : recommendations.length === 0 ? (
-        <div className="text-sm text-slate-500 py-8 text-center">No recommendations found. Generate recommendations from the S&OP cycle.</div>
+        <Card>
+          <CardContent className="py-8 text-center">
+            <p className="text-sm text-slate-500">No recommendations found.</p>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="space-y-4">
-          {recommendations.map((rec, index) => {
-            const severity = (rec.severity || "MEDIUM").toUpperCase();
-            return (
-              <div
-                key={rec.id || index}
-                className={`rounded-lg border px-5 py-4 ${SEVERITY_STYLES[severity] || SEVERITY_STYLES.MEDIUM}`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-xs font-semibold uppercase ${SEVERITY_TEXT[severity] || SEVERITY_TEXT.MEDIUM}`}>
-                        {severity}
-                      </span>
-                      <span className="text-xs text-slate-500">•</span>
-                      <span className="text-xs text-slate-500">{rec.recommendation_type}</span>
-                    </div>
-                    <h4 className="text-sm font-semibold text-slate-900">{rec.message}</h4>
-                    {rec.recommended_action && (
-                      <p className="text-sm text-slate-600 mt-1">{rec.recommended_action}</p>
-                    )}
-                    {rec.sku_code && (
-                      <p className="text-xs text-slate-500 mt-2">SKU: {rec.sku_code}</p>
-                    )}
-                  </div>
-                  <div className="flex gap-2 ml-4">
-                    {rec.shipment_reference && (
-                      <button
-                        onClick={() => navigate(`/e2/shipments/${rec.shipment_reference}`)}
-                        className="text-xs text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap"
-                      >
-                        View Shipment
-                      </button>
-                    )}
-                    {rec.procurement_plan_id && (
-                      <button
-                        onClick={() => navigate(`/p2/procurement/${rec.procurement_plan_id}`)}
-                        className="text-xs text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap"
-                      >
-                        View Plan
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        <div className="space-y-3">
+          <AnimatePresence>
+            {recommendations.map((rec, index) => {
+              const severity = (rec.severity || "MEDIUM").toUpperCase();
+              return (
+                <motion.div
+                  key={rec.id || index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card>
+                    <CardContent className="py-4">
+                      <div className="flex items-start justify-between flex-wrap gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <Badge variant={SEVERITY_VARIANT[severity] || "amber"}>{severity}</Badge>
+                            <span className="text-xs text-slate-500">•</span>
+                            <span className="text-xs text-slate-500">{rec.recommendation_type}</span>
+                          </div>
+                          <h4 className="text-sm font-semibold text-slate-900">{rec.message}</h4>
+                          {rec.recommended_action && (
+                            <p className="text-sm text-slate-600 mt-1">{rec.recommended_action}</p>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          {rec.shipment_reference && (
+                            <Button variant="ghost" size="sm" onClick={() => navigate(`/e2/shipments/${rec.shipment_reference}`)}>
+                              Shipment
+                            </Button>
+                          )}
+                          {rec.procurement_plan_id && (
+                            <Button variant="ghost" size="sm" onClick={() => navigate(`/p2/procurement/${rec.procurement_plan_id}`)}>
+                              Plan
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         </div>
       )}
     </PageWrapper>
