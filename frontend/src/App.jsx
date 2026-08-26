@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ClerkProvider, SignedIn, SignedOut, SignInButton, RedirectToSignIn } from "@clerk/clerk-react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
 import { CycleProvider } from "./context/CycleContext";
@@ -20,17 +20,7 @@ function ManagerGuard({ children }) {
   }
 
   if (!isManager) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">Access Denied</h1>
-          <p className="text-slate-600 mb-6">You need manager privileges to access the dashboard.</p>
-          <a href="/" className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800 transition-colors">
-            Go Home
-          </a>
-        </div>
-      </div>
-    );
+    return <Navigate to="/" replace />;
   }
 
   return children;
@@ -41,7 +31,7 @@ function AuthGate({ children }) {
     <>
       <SignedIn>{children}</SignedIn>
       <SignedOut>
-        <RedirectToSignIn />
+        <Navigate to="/" replace />
       </SignedOut>
     </>
   );
