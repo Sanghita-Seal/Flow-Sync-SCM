@@ -18,6 +18,9 @@ import ProcurementPlans from "../pages/p2/ProcurementPlans";
 import ProcurementPlanDetail from "../pages/p2/ProcurementPlanDetail";
 import RiskMonitor from "../pages/p2/RiskMonitor";
 import Recommendations from "../pages/p2/Recommendations";
+import DemandPlanning from "../pages/p2/DemandPlanning";
+import ProductionScheduling from "../pages/p2/ProductionScheduling";
+import MarkdownDecisionCenter from "../pages/p2/MarkdownDecisionCenter";
 
 export default function AppRoutes({ ManagerGuard, AuthGate }) {
   return (
@@ -43,6 +46,9 @@ export default function AppRoutes({ ManagerGuard, AuthGate }) {
         <Route path="/p2/procurement/:planId" element={<ProcurementPlanDetail />} />
         <Route path="/p2/risk" element={<RiskMonitor />} />
         <Route path="/p2/recommendations" element={<Recommendations />} />
+        <Route path="/p2/demand" element={<DemandPlanning />} />
+        <Route path="/p2/production" element={<ProductionScheduling />} />
+        <Route path="/p2/markdown" element={<MarkdownDecisionCenter />} />
       </Route>
     </Routes>
   );

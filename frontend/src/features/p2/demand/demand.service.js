@@ -2,7 +2,6 @@ import apiClient from "../../../api/apiClient";
 
 export async function getDemand(filters = {}) {
   const params = new URLSearchParams();
-  if (filters.cycleId) params.append("cycleId", filters.cycleId);
   if (filters.sku) params.append("sku", filters.sku);
   if (filters.week) params.append("week", filters.week);
   const query = params.toString();

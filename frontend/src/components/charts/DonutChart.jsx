@@ -18,7 +18,7 @@ export default function DonutChart({ data, colors = DEFAULT_COLORS, title, inner
             dataKey="value"
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+              <Cell key={`cell-${index}`} fill={entry.color || colors[index % colors.length]} />
             ))}
           </Pie>
           <Tooltip

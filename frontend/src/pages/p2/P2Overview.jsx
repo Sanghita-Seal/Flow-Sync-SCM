@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { Calendar, ShoppingCart, Shield, Lightbulb, TrendingUp, TrendingDown, Package, AlertTriangle } from "lucide-react";
+import { Calendar, ShoppingCart, Shield, Lightbulb, TrendingUp, TrendingDown, Package, AlertTriangle, Factory, Tag, Layers } from "lucide-react";
 import PageWrapper from "../../components/layout/PageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
 import SpotlightCard from "../../components/ui/SpotlightCard";
@@ -20,9 +20,13 @@ const ICON_COLORS = {
 
 const QUICK_LINKS = [
   { name: "S&OP Cycles", description: "Select planning cycles and manage S&OP.", icon: Calendar, to: "/p2/sop", color: "blue" },
+  { name: "Demand Planning", description: "Forecast demand by SKU for the cycle.", icon: TrendingUp, to: "/p2/demand", color: "blue" },
+  { name: "Production Scheduling", description: "Planned production and line capacity.", icon: Factory, to: "/p2/production", color: "cyan" },
+  { name: "Markdown Decisions", description: "Markdown recommendations for excess stock.", icon: Tag, to: "/p2/markdown", color: "violet" },
   { name: "Procurement", description: "Supplier orders and E2 shipment links.", icon: ShoppingCart, to: "/p2/procurement", color: "emerald" },
   { name: "Risk Monitor", description: "Plans at risk due to E2 delays.", icon: Shield, to: "/p2/risk", color: "amber" },
   { name: "Recommendations", description: "S&OP recommendations for replanning.", icon: Lightbulb, to: "/p2/recommendations", color: "rose" },
+  { name: "Inventory", description: "Current stock and risk levels.", icon: Package, to: "/p2/inventory", color: "emerald" },
 ];
 
 const SEVERITY_COLORS = {
@@ -239,7 +243,7 @@ export default function P2Overview() {
                 <CardTitle className="text-base">Quick Navigation</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {QUICK_LINKS.map((m) => (
                     <motion.button
                       key={m.name}

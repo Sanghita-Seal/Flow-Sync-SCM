@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { AlertTriangle } from "lucide-react";
+
 import PageWrapper from "../../components/layout/PageWrapper";
 import TruckSearch from "../../features/e2/trucks/components/TruckSearch";
 import TruckMap from "../../features/e2/trucks/components/TruckMap";
@@ -10,7 +10,7 @@ import StatusBadge from "../../components/ui/StatusBadge";
 import { getTrucks } from "../../features/e2/trucks/truck.service";
 import { getShipments } from "../../features/e2/shipments/shipment.service";
 import useTruckSimulation from "../../hooks/useTruckSimulation";
-import useYardAlerts from "../../hooks/useYardAlerts";
+
 
 export default function TruckTracker() {
   const [trucks, setTrucks] = useState([]);
@@ -35,7 +35,7 @@ export default function TruckTracker() {
       .finally(() => setLoading(false));
   }, []);
 
-  const yardWarnings = useYardAlerts(trucks);
+
 
   const filtered = trucks.filter((t) => {
     const q = query.trim().toLowerCase();
@@ -67,20 +67,6 @@ export default function TruckTracker() {
       </div>
 
       {/* Yard Warnings */}
-      {yardWarnings.length > 0 && (
-        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
-          <div className="flex items-center gap-2 mb-1">
-            <AlertTriangle size={14} className="text-amber-600" />
-            <span className="text-xs font-semibold text-amber-800">Yard Alerts</span>
-          </div>
-          <div className="space-y-1">
-            {yardWarnings.map((w, i) => (
-              <p key={i} className="text-xs text-amber-700">{w.message}</p>
-            ))}
-          </div>
-        </div>
-      )}
-
       {loading ? (
         <div className="text-sm text-slate-500 py-8 text-center">Loading trucks...</div>
       ) : (

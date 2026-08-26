@@ -65,6 +65,7 @@ export default function InventoryPage() {
     ? ["HEALTHY", "SHORTAGE", "EXCESS"].map((r) => ({
         name: RISK_STYLES[r].label,
         value: risks.filter((x) => x.risk === r).length,
+        color: r === "SHORTAGE" ? "#ef4444" : r === "EXCESS" ? "#f59e0b" : "#10b981",
       })).filter((d) => d.value > 0)
     : [];
 
@@ -121,7 +122,7 @@ export default function InventoryPage() {
                 </CardHeader>
                 <CardContent>
                   {riskDonutData.length > 0 ? (
-                    <DonutChart data={riskDonutData} />
+                    <DonutChart data={riskDonutData} colors={["#10b981", "#ef4444", "#f59e0b"]} />
                   ) : (
                     <p className="text-sm text-slate-400 text-center py-4">No risk data</p>
                   )}

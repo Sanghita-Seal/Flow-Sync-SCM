@@ -29,9 +29,9 @@ export default function Navbar() {
           System operational
         </div>
 
-        <button className="rounded-md p-2 text-slate-600 hover:bg-slate-100" aria-label="Notifications">
+        <Link to="/alerts" className="rounded-md p-2 text-slate-600 hover:bg-slate-100" aria-label="Notifications">
           <Bell width={18} height={18} />
-        </button>
+        </Link>
 
         {isSignedIn && (
           <div className="border-l border-slate-200 pl-2 sm:pl-4">
