@@ -11,6 +11,7 @@ import Alerts from "../pages/alerts/Alerts";
 import TrackPage from "../pages/track/TrackPage";
 
 import P2Overview from "../pages/p2/P2Overview";
+import InventoryPage from "../pages/p2/InventoryPage";
 import SopCycles from "../pages/p2/SopCycles";
 import ProcurementPlans from "../pages/p2/ProcurementPlans";
 import ProcurementPlanDetail from "../pages/p2/ProcurementPlanDetail";
@@ -34,6 +35,7 @@ export default function AppRoutes({ ManagerGuard, AuthGate }) {
         <Route path="/e2/shipments/:reference" element={<ShipmentDetail />} />
         <Route path="/alerts" element={<Alerts />} />
         <Route path="/p2/overview" element={<P2Overview />} />
+        <Route path="/p2/inventory" element={<InventoryPage />} />
         <Route path="/p2/sop" element={<SopCycles />} />
         <Route path="/p2/procurement" element={<ProcurementPlans />} />
         <Route path="/p2/procurement/:planId" element={<ProcurementPlanDetail />} />
