@@ -1,7 +1,6 @@
 import pool from "../../../common/config/database.js";
 
 class ProcurementModel {
-
   // ============================================================
   // Get procurement plans
   // ============================================================
@@ -11,8 +10,8 @@ class ProcurementModel {
     week,
     riskLevel,
     status,
+    cycleId,
   }) {
-
     let query = `
       SELECT
         pp.id,
@@ -66,6 +65,12 @@ class ProcurementModel {
       conditions.push(`pp.status = $${values.length}`);
     }
 
+    // Filter procurement plans by S&OP cycle
+    if (cycleId) {
+      values.push(cycleId);
+      conditions.push(`pp.sop_cycle_id = $${values.length}`);
+    }
+
     if (conditions.length > 0) {
       query += ` WHERE ${conditions.join(" AND ")}`;
     }
@@ -84,7 +89,6 @@ class ProcurementModel {
   // ============================================================
 
   static async getProcurementByProductId(productId) {
-
     const query = `
       SELECT
         pp.id,
@@ -127,7 +131,6 @@ class ProcurementModel {
   // ============================================================
 
   static async getProcurementSummary() {
-
     const query = `
       SELECT
         COUNT(*) AS procurement_plan_count,
@@ -154,7 +157,6 @@ class ProcurementModel {
   // ============================================================
 
   static async getProcurementRisk() {
-
     const query = `
       SELECT
         pp.id,
@@ -206,7 +208,6 @@ class ProcurementModel {
   // ============================================================
 
   static async getProcurementPlanShipments(procurementPlanId) {
-
     // ------------------------------------------------------------
     // 1. Get the procurement plan
     // ------------------------------------------------------------
@@ -270,7 +271,6 @@ class ProcurementModel {
         sh.planned_arrival,
         sh.planned_quantity_m,
         sh.received_quantity_m,
-
         t.id AS truck_id,
         t.trailer_id,
         t.tracking_number,
@@ -279,14 +279,10 @@ class ProcurementModel {
         t.current_location,
         t.latitude,
         t.longitude
-
       FROM e2.shipments sh
-
       LEFT JOIN e2.trucks t
         ON t.shipment_id = sh.id
-
       WHERE sh.procurement_plan_id = $1
-
       ORDER BY sh.shipment_reference
     `;
 
@@ -300,7 +296,6 @@ class ProcurementModel {
     // ------------------------------------------------------------
 
     const shipments = shipmentResult.rows.map((row) => {
-
       const shipment = {
         id: row.id,
         shipment_reference: row.shipment_reference,
