@@ -91,7 +91,7 @@ export default function TrackPage() {
     <PublicLayout>
       <div className="text-center mb-5">
         <div className="text-xs uppercase tracking-wide text-faint">Track your shipment</div>
-        <div className="text-sm text-muted mt-1">Enter tracking number or shipment reference to see live status</div>
+        <div className="text-sm text-muted mt-1">Search by tracking number, trailer ID, or shipment reference</div>
       </div>
 
       <div className="flex gap-2 mb-5">
@@ -99,7 +99,7 @@ export default function TrackPage() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleTrack()}
-          placeholder="e.g. TRK-001 or SHP-001"
+          placeholder="e.g. TRK-001, TRAILER-001, or SHP-001"
           className="flex-1 rounded-node border border-border bg-page px-3 py-2.5 text-sm text-ink placeholder:text-faint outline-none focus:border-primary focus:ring-2 focus:ring-primary-soft"
         />
         <button
