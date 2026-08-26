@@ -36,3 +36,61 @@
 | GET | `/api/e2/alerts/yard/:yard_name` | Check yard capacity |
 | POST | `/api/e2/dock/assign` | Auto-assign trucks to docks |
 | GET | `/api/e2/dock/assignments` | Get all current dock assignments |
+
+---
+
+## Phase 2: P2 ↔ E2 Frontend Integration
+
+### New Frontend Files
+
+#### P2 Services (7 files)
+- `features/p2/demand/demand.service.js` - Demand API calls
+- `features/p2/inventory/inventory.service.js` - Inventory API calls
+- `features/p2/production/production.service.js` - Production API calls
+- `features/p2/procurement/procurement.service.js` - Procurement API calls + plan shipments
+- `features/p2/sop/sop.service.js` - S&OP cycles, plans, recommendations
+- `features/p2/markdown/markdown.service.js` - Markdown API calls
+- `features/p2/overview/overview.service.js` - P2 overview API
+
+#### Context (1 file)
+- `context/CycleContext.jsx` - Planning cycle selection state provider
+
+#### P2 Pages (5 files)
+- `pages/p2/ProcurementPlans.jsx` - Procurement plans table with search and cycle filter
+- `pages/p2/ProcurementPlanDetail.jsx` - P2 plan detail + linked E2 shipments (key integration page)
+- `pages/p2/SopCycles.jsx` - S&OP cycle selection with navigation
+- `pages/p2/RiskMonitor.jsx` - Procurement risk from E2 execution delays
+- `pages/p2/Recommendations.jsx` - S&OP recommendations with severity and links
+
+#### E2 Pages (1 file)
+- `pages/e2/ShipmentDetail.jsx` - Shipment detail with P2 backlink and timeline
+
+### Modified Frontend Files
+- `features/e2/shipments/normalizeShipment.js` - Added procurementPlanId, quantities
+- `features/e2/shipments/components/ShipmentTable.jsx` - Added procurement link column, clickable rows
+- `pages/dashboard/Dashboard.jsx` - Added P2 KPIs and module cards
+- `components/layout/Sidebar.jsx` - Added P2 navigation sections with dividers
+- `routes/AppRoutes.jsx` - Added P2 and E2 detail routes
+- `App.jsx` - Added CycleProvider wrapper
+
+### New Routes
+| Path | Component | Description |
+|------|-----------|-------------|
+| `/p2/sop` | SopCycles | S&OP cycle selection |
+| `/p2/procurement` | ProcurementPlans | Procurement plans list |
+| `/p2/procurement/:planId` | ProcurementPlanDetail | P2 plan + E2 shipments |
+| `/p2/risk` | RiskMonitor | Procurement risk monitor |
+| `/p2/recommendations` | Recommendations | S&OP recommendations |
+| `/e2/shipments/:reference` | ShipmentDetail | Shipment detail with P2 link |
+
+### Integration Flow
+```
+P2 Planning → Procurement Plan → E2 Shipment → Truck → Location/ETA → Yard/Dock → P2 Risk → Recommendation
+```
+
+### Key Design Decisions
+1. Used `procurement_plan_id` as integration key (not SKU)
+2. Bidirectional navigation: P2→E2 and E2→P2
+3. CycleContext for planning cycle selection across all P2 pages
+4. P2 shows linked E2 shipments (not duplicated)
+5. E2 shows linked P2 procurement plan
