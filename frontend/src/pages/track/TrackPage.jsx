@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 import PublicLayout from "../../layouts/PublicLayout";
 import StatusBadge from "../../components/ui/StatusBadge";
 import { getTrucks } from "../../features/e2/trucks/truck.service";
+import { getShipments } from "../../features/e2/shipments/shipment.service";
 import useTruckSimulation from "../../hooks/useTruckSimulation";
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -56,10 +57,19 @@ export default function TrackPage() {
     setNotFound(false);
     setTruck(null);
     try {
-      const all = await getTrucks();
+      const [allTrucks, shipments] = await Promise.all([
+        getTrucks().catch(() => []),
+        getShipments().catch(() => []),
+      ]);
+      const refMap = {};
+      shipments.forEach((s) => { refMap[s.id] = s.reference; });
+      const enriched = allTrucks.map((t) => ({
+        ...t,
+        shipmentRef: refMap[t.shipmentId] || "",
+      }));
       const q = input.trim().toUpperCase();
-      const found = all.find(
-        (t) => t.truckId.toUpperCase() === q || t.shipmentId?.toUpperCase() === q
+      const found = enriched.find(
+        (t) => t.truckId.toUpperCase() === q || t.shipmentRef.toUpperCase() === q
       );
       if (found) setTruck(found);
       else { setTruck(null); setNotFound(true); }
@@ -89,7 +99,7 @@ export default function TrackPage() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleTrack()}
-          placeholder="e.g. TRK-001 or shipment UUID"
+          placeholder="e.g. TRK-001 or SHP-001"
           className="flex-1 rounded-node border border-border bg-page px-3 py-2.5 text-sm text-ink placeholder:text-faint outline-none focus:border-primary focus:ring-2 focus:ring-primary-soft"
         />
         <button
@@ -146,6 +156,10 @@ export default function TrackPage() {
               <StatusBadge status={truck.status} />
             </div>
             <div className="text-sm text-muted mb-3">{STATUS_TEXT[truck.status] || truck.status}</div>
+            <div className="flex justify-between py-1.5 border-t border-border text-sm">
+              <span className="text-faint">Shipment</span>
+              <span className="text-ink font-medium">{truck.shipmentRef || "—"}</span>
+            </div>
             <div className="flex justify-between py-1.5 border-t border-border text-sm">
               <span className="text-faint">Current location</span>
               <span className="text-ink font-medium">{truck.locationLabel || truck.yardName || "—"}</span>
