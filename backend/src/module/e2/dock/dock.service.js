@@ -1,12 +1,11 @@
 import DockModel from "./dock.model.js";
 
 class DockService {
-  // Get all docks
+
   static async getDocks() {
     return await DockModel.getDocks();
   }
 
-  // Get dock by dock code
   static async getDockByCode(dockCode) {
     const dock = await DockModel.getDockByCode(dockCode);
 
@@ -19,12 +18,14 @@ class DockService {
     return dock;
   }
 
-  // Get docks by status
   static async getDocksByStatus(status) {
     return await DockModel.getDocksByStatus(status);
   }
 
-  // Assign docks to eligible arrived trucks
+  static async getDockAssignments() {
+    return await DockModel.getDockAssignments();
+  }
+
   static async assignDocks() {
     return await DockModel.assignDocks();
   }

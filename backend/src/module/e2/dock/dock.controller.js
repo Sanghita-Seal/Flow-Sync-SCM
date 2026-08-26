@@ -57,6 +57,18 @@ class DockController {
       next(error);
     }
   }
+
+  static async getDockAssignments(req, res, next) {
+  try {
+    const assignments = await DockService.getDockAssignments();
+
+    return ApiResponse.list(res, assignments, {
+      count: assignments.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 }
 
 export default DockController;

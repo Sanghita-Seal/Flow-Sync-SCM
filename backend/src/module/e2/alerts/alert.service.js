@@ -1,6 +1,11 @@
 import AlertModel from "./alert.model.js";
 
 class AlertService {
+
+  // ============================================================
+  // GET DELAYED TRUCK ALERTS
+  // ============================================================
+
   static async getAlerts() {
     const trucks = await AlertModel.getAlerts();
 
@@ -14,6 +19,44 @@ class AlertService {
       current_location: truck.current_location,
       current_eta: truck.current_eta
     }));
+  }
+
+
+  // ============================================================
+  // CHECK DOCK AVAILABILITY
+  // ============================================================
+
+  static async checkDockAvailability(yardName) {
+
+    const result =
+      await AlertModel.checkDockAvailability(yardName);
+
+    if (!result) {
+      const error = new Error("Yard not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    return result;
+  }
+
+
+  // ============================================================
+  // CHECK YARD CAPACITY
+  // ============================================================
+
+  static async checkYardCapacity(yardName) {
+
+    const result =
+      await AlertModel.checkYardCapacity(yardName);
+
+    if (!result) {
+      const error = new Error("Yard not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    return result;
   }
 }
 
