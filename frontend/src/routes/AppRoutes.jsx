@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
-import Home from "../pages/Home";
+import LandingPage from "../pages/landing/LandingPage";
 import Dashboard from "../pages/dashboard/Dashboard";
 import TruckTracker from "../pages/e2/TruckTracker";
 import YardDocks from "../pages/e2/YardDocks";
@@ -19,7 +19,7 @@ export default function AppRoutes({ ManagerGuard, AuthGate }) {
   return (
     <Routes>
       {/* Public routes */}
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<LandingPage />} />
       <Route path="/track" element={<TrackPage />} />
 
       {/* Protected routes — must be signed in AND have manager role */}
