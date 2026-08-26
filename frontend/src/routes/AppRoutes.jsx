@@ -22,9 +22,9 @@ export default function AppRoutes({ ManagerGuard, AuthGate }) {
       <Route path="/" element={<Home />} />
       <Route path="/track" element={<TrackPage />} />
 
-      {/* Protected routes — must be signed in */}
-      <Route element={<AuthGate><MainLayout /></AuthGate>}>
-        <Route path="/dashboard" element={<ManagerGuard><Dashboard /></ManagerGuard>} />
+      {/* Protected routes — must be signed in AND have manager role */}
+      <Route element={<AuthGate><ManagerGuard><MainLayout /></ManagerGuard></AuthGate>}>
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/e2/trucks" element={<TruckTracker />} />
         <Route path="/e2/yard" element={<YardDocks />} />
         <Route path="/e2/shipments" element={<Shipments />} />
