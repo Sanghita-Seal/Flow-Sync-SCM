@@ -23,8 +23,6 @@ export default function TruckDetails({ truck }) {
           <Row label="Load Type">{truck.loadType || "—"}</Row>
           <Row label="Priority">{truck.priority || "normal"}</Row>
           <Row label="ETA">{truck.eta || truck.currentEta || "—"}</Row>
-          <Row label="Progress">{truck.progress != null ? `${truck.progress}%` : "—"}</Row>
-          <Row label="Destination">{truck.destination?.label || truck.destinationName || "—"}</Row>
         </div>
       ) : (
         <div className="text-sm text-slate-500">
