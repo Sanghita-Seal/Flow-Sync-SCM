@@ -2,36 +2,23 @@ import { evaluateInventoryRisk } from "./inventoryRisk.js";
 import { evaluateProductionRisk } from "./productionRisk.js";
 import { evaluateProcurementRisk } from "./procurementRisk.js";
 import { evaluateMarkdownOpportunity } from "./markdownRule.js";
+import { evaluateShipmentDelayRisk } from "./shipmentDelayRule.js";
 
 export function calculateSopPlan({
   forecastDemand,
   openingInventory,
   productionCapacity,
 }) {
-  const requiredProduction = Math.max(
-    0,
-    forecastDemand - openingInventory
-  );
+  const requiredProduction = Math.max(0, forecastDemand - openingInventory);
 
-  const plannedProduction = Math.min(
-    requiredProduction,
-    productionCapacity
-  );
+  const plannedProduction = Math.min(requiredProduction, productionCapacity);
 
   const projectedEndingInventory =
-    openingInventory +
-    plannedProduction -
-    forecastDemand;
+    openingInventory + plannedProduction - forecastDemand;
 
-  const supplyGap = Math.max(
-    0,
-    -projectedEndingInventory
-  );
+  const supplyGap = Math.max(0, -projectedEndingInventory);
 
-  const excessInventory = Math.max(
-    0,
-    projectedEndingInventory
-  );
+  const excessInventory = Math.max(0, projectedEndingInventory);
 
   let status = "BALANCED";
 
@@ -60,6 +47,14 @@ export function generateSopRecommendations({
   recommendedOrderQty,
   leadTimeWeeks,
   planningWeekNumber,
+
+  // E2 shipment information
+  plannedArrival,
+  currentEta,
+  shipmentStatus,
+  truckStatus,
+  plannedQuantity,
+  receivedQuantity,
 }) {
   const recommendations = [];
 
@@ -95,11 +90,23 @@ export function generateSopRecommendations({
     recommendations.push(procurementRisk);
   }
 
-  const markdownOpportunity =
-    evaluateMarkdownOpportunity({
-      projectedEndingInventory,
-      forecastDemand,
-    });
+  const shipmentDelayRisk = evaluateShipmentDelayRisk({
+    plannedArrival,
+    currentEta,
+    shipmentStatus,
+    truckStatus,
+    plannedQuantity,
+    receivedQuantity,
+  });
+
+  if (shipmentDelayRisk) {
+    recommendations.push(shipmentDelayRisk);
+  }
+
+  const markdownOpportunity = evaluateMarkdownOpportunity({
+    projectedEndingInventory,
+    forecastDemand,
+  });
 
   if (markdownOpportunity) {
     recommendations.push(markdownOpportunity);

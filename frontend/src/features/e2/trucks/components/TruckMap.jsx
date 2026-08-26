@@ -1,0 +1,64 @@
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+
+function truckIcon(status, isSelected) {
+  const color = status === "DELIVERED" ? "#10b981" : status === "IN_TRANSIT" ? "#f59e0b" : "#94a3b8";
+  const size = isSelected ? 18 : 14;
+  return L.divIcon({
+    className: "",
+    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3);${
+      isSelected ? "outline:3px solid rgba(59,130,246,0.35);" : ""
+    }"></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+}
+
+/**
+ * Real-world map showing the live/simulated position of each truck,
+ * with a dashed line to its destination.
+ */
+export default function TruckMap({ trucks, selectedId, onSelect, center = [22.9, 88.0] }) {
+  return (
+    <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+      <MapContainer center={center} zoom={8} style={{ height: "440px", width: "100%" }}>
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
+
+        {trucks.map((t) => {
+          const id = t.truckId || t.id;
+          return (
+            <Marker
+              key={id}
+              position={[t.latitude, t.longitude]}
+              icon={truckIcon(t.status, id === selectedId)}
+              eventHandlers={{ click: () => onSelect(id) }}
+            >
+              <Popup>
+                <strong>{id}</strong>
+                <div>{t.status}</div>
+              </Popup>
+            </Marker>
+          );
+        })}
+
+        {trucks.map((t) =>
+          t.destination ? (
+            <Polyline
+              key={`route-${t.truckId || t.id}`}
+              positions={[[t.latitude, t.longitude], [t.destination.latitude, t.destination.longitude]]}
+              pathOptions={{ color: "#94a3b8", weight: 2, dashArray: "4 6" }}
+            />
+          ) : null
+        )}
+      </MapContainer>
+    </div>
+  );
+}

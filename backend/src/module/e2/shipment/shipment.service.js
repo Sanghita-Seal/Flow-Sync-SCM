@@ -1,6 +1,7 @@
 import ShipmentModel from "./shipment.model.js";
 
 class ShipmentService {
+
   // Get all shipments
   static async getShipments() {
     return await ShipmentModel.getShipments();
@@ -24,6 +25,13 @@ class ShipmentService {
   // Get shipments by status
   static async getShipmentsByStatus(status) {
     return await ShipmentModel.getShipmentsByStatus(status);
+  }
+
+  // Get shipments by P2 procurement plan ID
+  static async getShipmentsByProcurementPlan(procurementPlanId) {
+    return await ShipmentModel.getShipmentsByProcurementPlan(
+      procurementPlanId
+    );
   }
 }
 

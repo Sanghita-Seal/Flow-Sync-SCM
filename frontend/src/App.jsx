@@ -1,13 +1,16 @@
+import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { ToastProvider } from "./context/ToastContext";
+import AppRoutes from "./routes/AppRoutes";
 
-
-
-function App() {
-
+export default function App() {
   return (
-    <div className="text-3xl font-bold text-blue-500">
-    hello world
-    </div>
-  )
+    <BrowserRouter>
+      <AuthProvider>
+        <ToastProvider>
+          <AppRoutes />
+        </ToastProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }
-
-export default App

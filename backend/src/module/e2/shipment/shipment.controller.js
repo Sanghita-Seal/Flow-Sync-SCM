@@ -2,6 +2,7 @@ import ShipmentService from "./shipment.service.js";
 import ApiResponse from "../../../common/utils/api-response.js";
 
 class ShipmentController {
+
   // GET /api/e2/shipment
   static async getShipments(req, res, next) {
     try {
@@ -34,7 +35,26 @@ class ShipmentController {
     try {
       const { status } = req.params;
 
-      const shipments = await ShipmentService.getShipmentsByStatus(status);
+      const shipments =
+        await ShipmentService.getShipmentsByStatus(status);
+
+      return ApiResponse.list(res, shipments, {
+        count: shipments.length,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // GET /api/e2/shipment/procurement/:procurementPlanId
+  static async getShipmentsByProcurementPlan(req, res, next) {
+    try {
+      const { procurementPlanId } = req.params;
+
+      const shipments =
+        await ShipmentService.getShipmentsByProcurementPlan(
+          procurementPlanId
+        );
 
       return ApiResponse.list(res, shipments, {
         count: shipments.length,
