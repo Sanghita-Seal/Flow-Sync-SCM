@@ -19,6 +19,10 @@ class ProcurementQueryDto extends BaseDto {
     status: Joi.string()
       .trim()
       .optional(),
+
+    cycleId: Joi.string()
+      .uuid()
+      .optional(),
   });
 }
 
