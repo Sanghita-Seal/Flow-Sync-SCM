@@ -94,3 +94,53 @@ P2 Planning → Procurement Plan → E2 Shipment → Truck → Location/ETA → 
 3. CycleContext for planning cycle selection across all P2 pages
 4. P2 shows linked E2 shipments (not duplicated)
 5. E2 shows linked P2 procurement plan
+
+---
+
+## Phase 3: Premium UI Upgrade
+
+### Modified Frontend Files
+- `components/layout/MainLayout.jsx` - Fixed-height layout with scrollable main content area
+- `components/layout/Sidebar.jsx` - Fixed sidebar height with internal scroll
+- `components/ui/SpotlightCard.jsx` - New Aceternity-style spotlight hover effect component
+- `components/ui/Card.jsx` - shadcn Card components (Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter)
+- `components/ui/Badge.jsx` - shadcn Badge component with variant support
+- `components/ui/Button.jsx` - shadcn Button component with variant/size support
+- `components/ui/Select.jsx` - shadcn Select components (Select, SelectTrigger, SelectValue, SelectContent, SelectItem)
+- `pages/dashboard/Dashboard.jsx` - Added Motion animations, Recharts (GroupedBar, MultiLine, Donut, RadialGauge), SpotlightCard effects, shadcn components
+- `pages/p2/ProcurementPlans.jsx` - Added Motion animations, shadcn Card/Badge/Button, SpotlightCard effects
+- `pages/p2/ProcurementPlanDetail.jsx` - Added Motion animations, shadcn components
+- `pages/p2/SopCycles.jsx` - Added Motion animations, shadcn components
+- `pages/p2/RiskMonitor.jsx` - Added Motion animations, shadcn components
+- `pages/p2/Recommendations.jsx` - Added Motion animations, shadcn components
+- `pages/e2/ShipmentDetail.jsx` - Added Motion animations, shadcn components
+
+### New Dependencies
+- `motion` (framer-motion) - Animation library
+- `recharts` - Chart library
+- `@radix-ui/react-select` - Select component primitives
+
+---
+
+## Phase 4: Collapsible Sidebar
+
+### Modified Frontend Files
+- `components/layout/Sidebar.jsx` - Added SidebarContext, hamburger menu toggle, slide-in animation, backdrop overlay
+- `context/SidebarContext.jsx` - New context for sidebar open/close state
+- `components/layout/MainLayout.jsx` - Integrated SidebarProvider wrapper
+
+---
+
+## Phase 5: Truck Tracker — Auto-Simulation
+
+### Modified Frontend Files
+- `hooks/useTruckSimulation.js` - New hook: frontend-only truck movement simulation using API lat/lng as starting point, increments by 0.00005 every 300ms
+- `features/e2/trucks/components/TruckMap.jsx` - Shows only selected truck when one is picked, zooms to level 14, uses simulated position for IN_TRANSIT trucks
+- `features/e2/trucks/components/TruckDetails.jsx` - Clean detail panel (Trailer, Shipment, Status, Load Type, Priority, ETA)
+- `pages/e2/TruckTracker.jsx` - Auto-simulates IN_TRANSIT trucks on selection, no manual controls needed
+
+### Behavior
+- Click any truck → map zooms to it, shows only that truck
+- IN_TRANSIT trucks → marker moves automatically (simulated GPS)
+- DELAYED/ARRIVED trucks → static marker
+- Selecting a different truck → resets and zooms to new truck
