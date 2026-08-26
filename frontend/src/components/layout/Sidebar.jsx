@@ -7,6 +7,7 @@ const NAV_SECTIONS = [
   {
     label: "E2 — Execution",
     items: [
+      { to: "/e2/overview", label: "Overview", icon: BarChart3 },
       { to: "/e2/shipments", label: "Shipments", icon: Container },
       { to: "/e2/trucks", label: "Trucks", icon: Truck },
       { to: "/e2/yard", label: "Yard & Docks", icon: Warehouse },
