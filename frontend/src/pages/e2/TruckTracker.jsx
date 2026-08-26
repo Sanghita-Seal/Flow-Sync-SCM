@@ -24,7 +24,8 @@ export default function TruckTracker() {
     if (!q) return true;
     return (
       t.truckId.toLowerCase().includes(q) ||
-      t.trailerId.toLowerCase().includes(q)
+      t.trailerId.toLowerCase().includes(q) ||
+      t.shipmentId?.toLowerCase().includes(q)
     );
   });
 
@@ -33,7 +34,7 @@ export default function TruckTracker() {
     if (!q) return;
 
     const exactMatch = trucks.find(
-      (t) => t.truckId?.toLowerCase() === q || t.trailerId?.toLowerCase() === q
+      (t) => t.truckId?.toLowerCase() === q || t.trailerId?.toLowerCase() === q || t.shipmentId?.toLowerCase() === q
     );
 
     if (exactMatch) {
@@ -74,6 +75,7 @@ export default function TruckTracker() {
               <thead>
                 <tr className="bg-slate-50 text-slate-500 text-left">
                   <th className="px-4 py-2.5 font-medium text-xs uppercase tracking-wide">Truck</th>
+                  <th className="px-4 py-2.5 font-medium text-xs uppercase tracking-wide">Shipment Ref</th>
                   <th className="px-4 py-2.5 font-medium text-xs uppercase tracking-wide">Status</th>
                   <th className="px-4 py-2.5 font-medium text-xs uppercase tracking-wide">Priority</th>
                   <th className="px-4 py-2.5 font-medium text-xs uppercase tracking-wide">Load Type</th>
@@ -91,6 +93,7 @@ export default function TruckTracker() {
                     }`}
                   >
                     <td className="px-4 py-3 text-slate-900 font-medium">{t.truckId}</td>
+                    <td className="px-4 py-3 text-xs text-slate-500 font-mono">{t.shipmentId?.slice(0, 8)}...</td>
                     <td className="px-4 py-3"><StatusBadge status={t.status} /></td>
                     <td className="px-4 py-3 text-slate-700 capitalize">{t.priority}</td>
                     <td className="px-4 py-3 text-slate-700">{t.loadType}</td>

@@ -57,7 +57,10 @@ export default function TrackPage() {
     setTruck(null);
     try {
       const all = await getTrucks();
-      const found = all.find((t) => t.truckId.toUpperCase() === input.trim().toUpperCase());
+      const q = input.trim().toUpperCase();
+      const found = all.find(
+        (t) => t.truckId.toUpperCase() === q || t.shipmentId?.toUpperCase() === q
+      );
       if (found) setTruck(found);
       else { setTruck(null); setNotFound(true); }
     } catch {
@@ -78,7 +81,7 @@ export default function TrackPage() {
     <PublicLayout>
       <div className="text-center mb-5">
         <div className="text-xs uppercase tracking-wide text-faint">Track your shipment</div>
-        <div className="text-sm text-muted mt-1">Enter your tracking number to see live status</div>
+        <div className="text-sm text-muted mt-1">Enter tracking number or shipment reference to see live status</div>
       </div>
 
       <div className="flex gap-2 mb-5">
@@ -86,7 +89,7 @@ export default function TrackPage() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleTrack()}
-          placeholder="e.g. TRK-001"
+          placeholder="e.g. TRK-001 or shipment UUID"
           className="flex-1 rounded-node border border-border bg-page px-3 py-2.5 text-sm text-ink placeholder:text-faint outline-none focus:border-primary focus:ring-2 focus:ring-primary-soft"
         />
         <button
