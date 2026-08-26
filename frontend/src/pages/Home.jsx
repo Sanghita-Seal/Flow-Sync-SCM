@@ -2,7 +2,7 @@ import { SignInButton, UserButton, SignOutButton, useAuth } from "@clerk/clerk-r
 import { useNavigate } from "react-router-dom";
 
 export default function Home() {
-  const { isSignedIn, isManager } = useAuth();
+  const { isSignedIn, isManager, role } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -19,6 +19,7 @@ export default function Home() {
           </SignInButton>
         ) : (
           <div className="flex flex-col items-center gap-4">
+            <div className="text-xs text-slate-400">Role: {role}</div>
             {isManager && (
               <button
                 onClick={() => navigate("/dashboard")}

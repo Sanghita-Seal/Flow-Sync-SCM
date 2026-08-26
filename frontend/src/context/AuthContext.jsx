@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { useUser, useAuth as useClerkAuth } from "@clerk/clerk-react";
 
 const AuthContext = createContext(null);
@@ -6,6 +6,13 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const { user, isLoaded } = useUser();
   const { isSignedIn, signOut } = useClerkAuth();
+
+  // Force reload user to get fresh metadata after dashboard edits
+  useEffect(() => {
+    if (user) {
+      user.reload();
+    }
+  }, [user?.id]);
 
   const role = user?.publicMetadata?.role || "user";
 
