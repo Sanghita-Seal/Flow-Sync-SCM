@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import PageWrapper from "../../components/layout/PageWrapper";
 import TruckSearch from "../../features/e2/trucks/components/TruckSearch";
 import TruckMap from "../../features/e2/trucks/components/TruckMap";
 import TruckDetails from "../../features/e2/trucks/components/TruckDetails";
 import StatusBadge from "../../components/ui/StatusBadge";
 import { getTrucks } from "../../features/e2/trucks/truck.service";
+import useTruckSimulation from "../../hooks/useTruckSimulation";
 
 // This page is for the WAREHOUSE TEAM only — shows every truck in the
 // fleet. The customer-facing single-lookup page is at /track.
@@ -13,6 +14,7 @@ export default function TruckTracker() {
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isSimulating, setIsSimulating] = useState(false);
 
   useEffect(() => {
     getTrucks()
@@ -28,24 +30,37 @@ export default function TruckTracker() {
       t.trailerId.toLowerCase().includes(q)
     );
   });
-  
-useEffect(() => {
-  const q = query.trim().toLowerCase();
 
-  if (!q) return;
+  useEffect(() => {
+    const q = query.trim().toLowerCase();
 
-  const exactMatch = trucks.find(
-    (t) =>
-      t.truckId?.toLowerCase() === q ||
-      t.trailerId?.toLowerCase() === q
-  );
+    if (!q) return;
 
-  if (exactMatch) {
-    setSelectedId(exactMatch.truckId);
-  }
-}, [query, trucks]);
+    const exactMatch = trucks.find(
+      (t) =>
+        t.truckId?.toLowerCase() === q ||
+        t.trailerId?.toLowerCase() === q
+    );
+
+    if (exactMatch) {
+      setSelectedId(exactMatch.truckId);
+    }
+  }, [query, trucks]);
 
   const selectedTruck = trucks.find((t) => t.truckId === selectedId) || null;
+
+  // Run simulation for the selected truck
+  const { position, hasGps } = useTruckSimulation(selectedTruck, isSimulating);
+
+  // Reset simulation when truck changes
+  const handleSelect = useCallback((truckId) => {
+    setSelectedId(truckId);
+    setIsSimulating(false);
+  }, []);
+
+  const toggleSimulation = useCallback(() => {
+    setIsSimulating((prev) => !prev);
+  }, []);
 
   return (
     <PageWrapper title="E2 — Truck Tracker" description="Warehouse operations view — search, track, and monitor every truck in the network.">
@@ -59,9 +74,19 @@ useEffect(() => {
         <>
           <div className="flex gap-4 flex-wrap items-start mb-6">
             <div className="flex-1 min-w-[320px]">
-              <TruckMap trucks={filtered} selectedId={selectedId} onSelect={setSelectedId} />
+              <TruckMap
+                trucks={filtered}
+                selectedId={selectedId}
+                onSelect={handleSelect}
+                simulatedPosition={isSimulating ? position : null}
+              />
             </div>
-            <TruckDetails truck={selectedTruck} />
+            <TruckDetails
+              truck={selectedTruck}
+              isSimulating={isSimulating}
+              onToggleSimulation={toggleSimulation}
+              hasGps={hasGps}
+            />
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -80,7 +105,7 @@ useEffect(() => {
                 {filtered.map((t) => (
                   <tr
                     key={t.truckId}
-                    onClick={() => setSelectedId(t.truckId)}
+                    onClick={() => handleSelect(t.truckId)}
                     className={`cursor-pointer border-t border-slate-100 ${
                       t.truckId === selectedId ? "bg-blue-50" : "hover:bg-slate-50"
                     }`}

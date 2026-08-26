@@ -1,4 +1,5 @@
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import { useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -23,27 +24,72 @@ function truckIcon(status, isSelected) {
 }
 
 /**
+ * Pans the map to follow the selected truck's simulated position.
+ */
+function MapFollower({ position }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (position) {
+      map.panTo(position, { animate: true, duration: 0.5 });
+    }
+  }, [position, map]);
+
+  return null;
+}
+
+/**
  * Real-world map showing the live/simulated position of each truck,
  * with a dashed line to its destination.
+ *
+ * @param {Object} props
+ * @param {Array} props.trucks - All trucks to display
+ * @param {string|null} props.selectedId - Currently selected truck ID
+ * @param {Function} props.onSelect - Callback when a truck marker is clicked
+ * @param {Array} props.center - Default map center [lat, lng]
+ * @param {{ latitude: number, longitude: number }|null} props.simulatedPosition - Simulated position for the selected truck
  */
-export default function TruckMap({ trucks, selectedId, onSelect, center = [22.9, 88.0] }) {
+export default function TruckMap({ trucks, selectedId, onSelect, center = [22.9, 88.0], simulatedPosition }) {
   return (
-    <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+    <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm relative">
       <MapContainer center={center} zoom={8} style={{ height: "440px", width: "100%" }}>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
 
+        {/* Follow the simulated position */}
+        {simulatedPosition && (
+          <MapFollower position={[simulatedPosition.latitude, simulatedPosition.longitude]} />
+        )}
+
         {trucks.map((t) => {
           const id = t.truckId || t.id;
+          const isSelected = id === selectedId;
+
+          // Use simulated position for the selected truck, API position for others
+          const lat = isSelected && simulatedPosition
+            ? simulatedPosition.latitude
+            : t.latitude;
+          const lng = isSelected && simulatedPosition
+            ? simulatedPosition.longitude
+            : t.longitude;
+
+          // Skip rendering if no valid coordinates
+          if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return null;
+
           return (
             <Marker
               key={id}
-              position={[t.latitude, t.longitude]}
-              icon={truckIcon(t.status, id === selectedId)}
+              position={[lat, lng]}
+              icon={truckIcon(t.status, isSelected)}
               eventHandlers={{ click: () => onSelect(id) }}
             >
               <Popup>
                 <strong>{id}</strong>
                 <div>{t.status}</div>
+                {isSelected && simulatedPosition && (
+                  <div style={{ fontSize: "10px", color: "#6366f1", marginTop: "2px" }}>
+                    GPS Simulation
+                  </div>
+                )}
               </Popup>
             </Marker>
           );
@@ -59,6 +105,14 @@ export default function TruckMap({ trucks, selectedId, onSelect, center = [22.9,
           ) : null
         )}
       </MapContainer>
+
+      {/* GPS Simulation indicator */}
+      {simulatedPosition && (
+        <div className="absolute top-3 right-3 z-[1000] bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-medium px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+          GPS Simulation
+        </div>
+      )}
     </div>
   );
 }
