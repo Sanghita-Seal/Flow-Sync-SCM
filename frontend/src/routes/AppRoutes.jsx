@@ -14,6 +14,7 @@ import ProcurementPlans from "../pages/p2/ProcurementPlans";
 import ProcurementPlanDetail from "../pages/p2/ProcurementPlanDetail";
 import RiskMonitor from "../pages/p2/RiskMonitor";
 import Recommendations from "../pages/p2/Recommendations";
+import P2Overview from "../pages/p2/P2Overview";
 
 export default function AppRoutes({ ManagerGuard, AuthGate }) {
   return (
@@ -30,6 +31,7 @@ export default function AppRoutes({ ManagerGuard, AuthGate }) {
         <Route path="/e2/shipments" element={<Shipments />} />
         <Route path="/e2/shipments/:reference" element={<ShipmentDetail />} />
         <Route path="/alerts" element={<Alerts />} />
+        <Route path="/p2/overview" element={<P2Overview />} />
         <Route path="/p2/sop" element={<SopCycles />} />
         <Route path="/p2/procurement" element={<ProcurementPlans />} />
         <Route path="/p2/procurement/:planId" element={<ProcurementPlanDetail />} />
