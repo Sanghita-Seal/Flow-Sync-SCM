@@ -23,6 +23,14 @@ class DockService {
   static async getDocksByStatus(status) {
     return await DockModel.getDocksByStatus(status);
   }
+
+  static async getDockAssignments() {
+    return await DockModel.getDockAssignments();
+  }
+
+  static async assignDocks() {
+    return await DockModel.assignDocks();
+  }
 }
 
 export default DockService;
