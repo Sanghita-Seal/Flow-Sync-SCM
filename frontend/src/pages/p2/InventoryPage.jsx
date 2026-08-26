@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { Package, AlertTriangle, Shield, Search, RefreshCw } from "lucide-react";
+import { Package, AlertTriangle, Shield, Search } from "lucide-react";
 import PageWrapper from "../../components/layout/PageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
-import { Badge } from "../../components/ui/Badge";
 import SpotlightCard from "../../components/ui/SpotlightCard";
 import AnimatedCard from "../../components/ui/AnimatedCard";
 import DonutChart from "../../components/charts/DonutChart";
@@ -18,9 +17,9 @@ const ICON_COLORS = {
 };
 
 const RISK_STYLES = {
-  HEALTHY: { label: "Healthy", badge: "emerald", icon: Shield },
-  SHORTAGE: { label: "Shortage", badge: "rose", icon: AlertTriangle },
-  EXCESS: { label: "Excess", badge: "amber", icon: Package },
+  HEALTHY: { label: "Healthy", icon: Shield },
+  SHORTAGE: { label: "Shortage", icon: AlertTriangle },
+  EXCESS: { label: "Excess", icon: Package },
 };
 
 export default function InventoryPage() {
@@ -55,7 +54,8 @@ export default function InventoryPage() {
         inventory.filter(
           (item) =>
             item.sku_code?.toLowerCase().includes(q) ||
-            item.product_name?.toLowerCase().includes(q)
+            item.product_name?.toLowerCase().includes(q) ||
+            item.product_id?.toLowerCase().includes(q)
         )
       );
     }
@@ -112,9 +112,9 @@ export default function InventoryPage() {
             </div>
           )}
 
-          {/* Risk Summary Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <AnimatedCard delay={0.3}>
+          {/* Masonry Risk Section */}
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
+            <AnimatedCard delay={0.3} className="break-inside-avoid">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Risk Breakdown</CardTitle>
@@ -128,7 +128,8 @@ export default function InventoryPage() {
                 </CardContent>
               </Card>
             </AnimatedCard>
-            <AnimatedCard delay={0.4}>
+
+            <AnimatedCard delay={0.4} className="break-inside-avoid">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Risk Counts</CardTitle>
@@ -152,13 +153,14 @@ export default function InventoryPage() {
                 </CardContent>
               </Card>
             </AnimatedCard>
-            <AnimatedCard delay={0.5}>
+
+            <AnimatedCard delay={0.5} className="break-inside-avoid">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Shortage Products</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                  <div className="space-y-2">
                     {risks.filter((r) => r.risk === "SHORTAGE").length === 0 ? (
                       <p className="text-sm text-slate-400 text-center py-4">No shortages</p>
                     ) : (
@@ -180,10 +182,68 @@ export default function InventoryPage() {
                 </CardContent>
               </Card>
             </AnimatedCard>
+
+            <AnimatedCard delay={0.55} className="break-inside-avoid">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Excess Products</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {risks.filter((r) => r.risk === "EXCESS").length === 0 ? (
+                      <p className="text-sm text-slate-400 text-center py-4">No excess</p>
+                    ) : (
+                      risks
+                        .filter((r) => r.risk === "EXCESS")
+                        .map((r) => (
+                          <div key={r.product_id} className="flex items-center justify-between p-2 rounded-lg bg-amber-50 border border-amber-100">
+                            <div>
+                              <span className="text-sm font-medium text-slate-900">{r.sku_code}</span>
+                              <span className="text-xs text-slate-500 ml-2">{r.product_name}</span>
+                            </div>
+                            <span className="text-xs text-amber-600 font-medium">
+                              {r.inventory_units.toLocaleString()} / {r.total_forecast_demand.toLocaleString()}
+                            </span>
+                          </div>
+                        ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </AnimatedCard>
+
+            <AnimatedCard delay={0.6} className="break-inside-avoid">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Healthy Products</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {risks.filter((r) => r.risk === "HEALTHY").length === 0 ? (
+                      <p className="text-sm text-slate-400 text-center py-4">None</p>
+                    ) : (
+                      risks
+                        .filter((r) => r.risk === "HEALTHY")
+                        .map((r) => (
+                          <div key={r.product_id} className="flex items-center justify-between p-2 rounded-lg bg-emerald-50 border border-emerald-100">
+                            <div>
+                              <span className="text-sm font-medium text-slate-900">{r.sku_code}</span>
+                              <span className="text-xs text-slate-500 ml-2">{r.product_name}</span>
+                            </div>
+                            <span className="text-xs text-emerald-600 font-medium">
+                              {r.inventory_units.toLocaleString()} / {r.total_forecast_demand.toLocaleString()}
+                            </span>
+                          </div>
+                        ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </AnimatedCard>
           </div>
 
           {/* Search + Table */}
-          <AnimatedCard delay={0.6}>
+          <AnimatedCard delay={0.7}>
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -194,8 +254,8 @@ export default function InventoryPage() {
                       <input
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search by SKU or name..."
-                        className="pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 w-56"
+                        placeholder="Search by SKU, name, or product ID..."
+                        className="pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 w-72"
                       />
                     </div>
                   </div>
@@ -208,6 +268,7 @@ export default function InventoryPage() {
                       <tr className="border-b border-slate-200">
                         <th className="text-left py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase">SKU</th>
                         <th className="text-left py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase">Product</th>
+                        <th className="text-left py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase">Product ID</th>
                         <th className="text-right py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase">Stock</th>
                         <th className="text-right py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase">Forecast Demand</th>
                         <th className="text-center py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase">Coverage</th>
@@ -218,7 +279,7 @@ export default function InventoryPage() {
                     <tbody>
                       {filtered.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="text-center py-8 text-slate-400">
+                          <td colSpan={8} className="text-center py-8 text-slate-400">
                             No inventory found.
                           </td>
                         </tr>
@@ -236,6 +297,7 @@ export default function InventoryPage() {
                             <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                               <td className="py-2.5 px-3 font-medium text-slate-900">{item.sku_code}</td>
                               <td className="py-2.5 px-3 text-slate-600">{item.product_name}</td>
+                              <td className="py-2.5 px-3 text-xs text-slate-400 font-mono">{item.product_id?.slice(0, 8)}...</td>
                               <td className="py-2.5 px-3 text-right font-semibold text-slate-900">
                                 {parseInt(item.current_inventory_units, 10).toLocaleString()}
                               </td>
