@@ -36,6 +36,12 @@ app.get("/", (req, res) => {
   });
 });
 
+app.get("/health", (req, res) => {
+  res.json({
+    status: "healthy",
+  });
+});
+
 // Database connection test
 app.get("/db-test", async (req, res) => {
   try {
