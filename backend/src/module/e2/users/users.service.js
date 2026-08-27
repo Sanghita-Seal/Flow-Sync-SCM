@@ -36,7 +36,6 @@ function clerkRequest(method, path, body) {
 export async function listUsers() {
   if (!CLERK_SECRET) throw new Error("CLERK_SECRET is not set");
   const data = await clerkRequest("GET", "/users?limit=100");
-  console.log("CLERK API RESPONSE:", JSON.stringify(data).substring(0, 500));
   const users = data.data || data;
   if (!Array.isArray(users)) throw new Error("Unexpected Clerk response: " + JSON.stringify(data).substring(0, 200));
   return users.map((u) => ({

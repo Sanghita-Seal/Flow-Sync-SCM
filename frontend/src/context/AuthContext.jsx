@@ -14,21 +14,6 @@ export function AuthProvider({ children }) {
     }
   }, [user?.id]);
 
-  // Debug: log full user metadata
-  useEffect(() => {
-    if (isLoaded && user) {
-      console.log("=== CLERK USER DEBUG ===");
-      console.log("User ID:", user.id);
-      console.log("Email:", user.primaryEmailAddress?.emailAddress);
-      console.log("Full Name:", user.fullName);
-      console.log("Public Metadata:", JSON.stringify(user.publicMetadata, null, 2));
-      console.log("Private Metadata:", JSON.stringify(user.privateMetadata, null, 2));
-      console.log("Unsafe Metadata:", JSON.stringify(user.unsafeMetadata, null, 2));
-      console.log("Role from metadata:", user.publicMetadata?.role);
-      console.log("========================");
-    }
-  }, [isLoaded, user?.id, user?.publicMetadata]);
-
   const role = user?.publicMetadata?.role || "user";
 
   const value = {
