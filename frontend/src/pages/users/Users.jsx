@@ -5,13 +5,17 @@ import apiClient from "../../api/apiClient";
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(null);
 
   useEffect(() => {
     apiClient
       .get("/api/users")
       .then((res) => setUsers(res.data.data))
-      .catch(() => setUsers([]))
+      .catch((err) => {
+        const msg = err.response?.data?.message || err.message || "Failed to load users";
+        setError(msg);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -36,6 +40,8 @@ export default function Users() {
     >
       {loading ? (
         <div className="text-sm text-slate-500 py-8 text-center">Loading users...</div>
+      ) : error ? (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</div>
       ) : (
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           <table className="w-full border-collapse text-sm">

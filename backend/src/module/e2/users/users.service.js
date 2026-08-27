@@ -9,8 +9,12 @@ function headers() {
 }
 
 export async function listUsers() {
+  if (!CLERK_SECRET) throw new Error("CLERK_SECRET is not set");
   const res = await fetch(`${CLERK_API}/users?limit=100`, { headers: headers() });
-  if (!res.ok) throw new Error(`Clerk API error: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Clerk API error: ${res.status} - ${body}`);
+  }
   const data = await res.json();
   return data.data.map((u) => ({
     id: u.id,
