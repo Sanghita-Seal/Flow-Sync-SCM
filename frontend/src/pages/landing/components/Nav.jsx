@@ -80,6 +80,11 @@ export default function Nav() {
           )}
         </div>
 
+        {isSignedIn && (
+          <div className="lg:hidden">
+            <UserButton afterSignOutUrl="/" />
+          </div>
+        )}
         <button
           onClick={() => setOpen((prev) => !prev)}
           aria-label="Toggle menu"
