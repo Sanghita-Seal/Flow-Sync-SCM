@@ -1,14 +1,13 @@
 import https from "https";
 
 const CLERK_SECRET = process.env.CLERK_SECRET;
-const CLERK_API = "https://api.clerk.com/v1";
+const CLERK_HOST = "api.clerk.com";
 
 function clerkRequest(method, path, body) {
   return new Promise((resolve, reject) => {
-    const url = new URL(path, CLERK_API);
     const options = {
-      hostname: url.hostname,
-      path: url.pathname + url.search,
+      hostname: CLERK_HOST,
+      path: `/v1${path}`,
       method,
       headers: {
         Authorization: `Bearer ${CLERK_SECRET}`,
