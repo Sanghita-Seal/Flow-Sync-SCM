@@ -1,22 +1,29 @@
 import StatusBadge from "../../../../components/ui/StatusBadge";
 
-// Small square inside the yard box, one per dock.
 const DOT_STYLES = {
   AVAILABLE: "bg-emerald-500",
-  OCCUPIED: "bg-orange-500",
+  OCCUPIED: "bg-rose-500",
   UNAVAILABLE: "bg-slate-400",
 };
 const BOX_STYLES = {
   AVAILABLE: "bg-emerald-50 border-emerald-200",
-  OCCUPIED: "bg-orange-50 border-orange-200",
-  UNAVAILABLE: "bg-slate-100 border-slate-200",
+  OCCUPIED: "bg-rose-50 border-rose-200",
+  UNAVAILABLE: "bg-slate-50 border-slate-200",
+};
+const LABEL_STYLES = {
+  AVAILABLE: "text-emerald-600",
+  OCCUPIED: "text-rose-600",
+  UNAVAILABLE: "text-slate-500",
 };
 
 function DockBox({ dock }) {
   return (
-    <div className={`rounded-lg border p-2.5 flex flex-col items-center justify-center gap-1 ${BOX_STYLES[dock.status] || BOX_STYLES.UNAVAILABLE}`}>
-      <span className={`w-2 h-2 rounded-full ${DOT_STYLES[dock.status] || DOT_STYLES.UNAVAILABLE}`} />
-      <span className="text-xs font-semibold text-slate-900">{dock.dockCode}</span>
+    <div className={`rounded-lg border p-3 flex flex-col items-center justify-center gap-1.5 ${BOX_STYLES[dock.status] || BOX_STYLES.UNAVAILABLE}`}>
+      <span className={`w-2.5 h-2.5 rounded-full ${DOT_STYLES[dock.status] || DOT_STYLES.UNAVAILABLE}`} />
+      <span className="text-xs font-bold text-slate-900">{dock.dockCode}</span>
+      <span className={`text-[10px] font-medium ${LABEL_STYLES[dock.status] || LABEL_STYLES.UNAVAILABLE}`}>
+        {(dock.status || "unavailable").toLowerCase().replace(/_/g, " ")}
+      </span>
     </div>
   );
 }

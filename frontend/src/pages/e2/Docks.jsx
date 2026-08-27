@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { motion } from "motion/react";
 import { Anchor, CheckCircle, AlertTriangle, Download } from "lucide-react";
 import PageWrapper from "../../components/layout/PageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
-import DockStatusBoard from "../../features/e2/docks/components/DockStatusBoard";
+import YardDockPanel from "../../features/e2/yard/components/YardDockPanel";
+import { getYards } from "../../features/e2/yard/yard.service";
 import DockAssignments from "../../features/e2/docks/components/DockAssignments";
 import { getDocks, getDockAssignments, assignDocks } from "../../features/e2/docks/dock.service";
 import { getTrucks } from "../../features/e2/trucks/truck.service";
@@ -22,9 +22,8 @@ function exportCsv(assignments) {
   URL.revokeObjectURL(url);
 }
 
-const PRIORITY_VARIANT = { HIGH: "rose", MEDIUM: "amber", LOW: "emerald" };
-
 export default function Docks() {
+  const [yards, setYards] = useState([]);
   const [docks, setDocks] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [trucks, setTrucks] = useState([]);
@@ -35,8 +34,8 @@ export default function Docks() {
   const [selectedTrailer, setSelectedTrailer] = useState(null);
 
   useEffect(() => {
-    Promise.all([getDocks().catch(() => []), getTrucks().catch(() => [])])
-      .then(([d, t]) => { setDocks(d); setTrucks(t); })
+    Promise.all([getYards().catch(() => []), getDocks().catch(() => []), getTrucks().catch(() => [])])
+      .then(([y, d, t]) => { setYards(y); setDocks(d); setTrucks(t); })
       .finally(() => setLoading(false));
     getDockAssignments()
       .then(setAssignments)
@@ -59,13 +58,11 @@ export default function Docks() {
     }
   }
 
-  // Trailers that arrived but have no dock assignment
   const assignedTrailerIds = new Set(assignments.map((a) => a.trailer_id));
   const unassignedTrailers = trucks.filter(
     (t) => (t.status === "ARRIVED" || t.status === "IN_TRANSIT" || t.status === "DELAYED") && !assignedTrailerIds.has(t.trailerId)
   );
 
-  // Recommendation: best available dock in the same yard
   const selectedTruck = selectedTrailer ? trucks.find((t) => t.trailerId === selectedTrailer) : null;
   const availableDocks = docks.filter((d) => d.status === "AVAILABLE");
   const recommendedDock = selectedTruck?.yardName
@@ -75,7 +72,7 @@ export default function Docks() {
   return (
     <PageWrapper
       title="E2 — Dock Assignments"
-      description="Dock availability, recommendations, and trailer-to-door allocation."
+      description="Yard occupancy, dock availability, and trailer-to-door allocation."
       actions={
         <div className="flex items-center gap-2">
           {assignments.length > 0 && (
@@ -102,11 +99,20 @@ export default function Docks() {
         <div className="text-sm text-slate-500 py-8 text-center">Loading docks...</div>
       ) : (
         <>
-          <DockStatusBoard docks={docks} />
+          {/* Yard + Docks grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+            {yards.map((yard) => (
+              <YardDockPanel
+                key={yard.id}
+                yard={yard}
+                docks={docks.filter((d) => d.yardName === yard.name)}
+              />
+            ))}
+          </div>
 
           {/* Assignment Result */}
           {assignResult && !assignResult.error && (
-            <div className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 mb-6">
               <h3 className="text-sm font-semibold text-emerald-800 mb-2 flex items-center gap-2">
                 <CheckCircle size={14} /> Assignment Complete
               </h3>
@@ -137,13 +143,13 @@ export default function Docks() {
             </div>
           )}
           {assignResult?.error && (
-            <div className="mt-6 rounded-lg border border-rose-200 bg-rose-50 p-4">
+            <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 mb-6">
               <p className="text-sm text-rose-700">Assignment failed: {assignResult.error}</p>
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-            {/* Unassigned Trailers */}
+          {/* Unassigned Trailers + Dock Recommendation */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="lg:col-span-1">
               <CardHeader>
                 <CardTitle className="text-base">Unassigned Trailers ({unassignedTrailers.length})</CardTitle>
@@ -179,7 +185,6 @@ export default function Docks() {
               </CardContent>
             </Card>
 
-            {/* Dock Recommendation */}
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
