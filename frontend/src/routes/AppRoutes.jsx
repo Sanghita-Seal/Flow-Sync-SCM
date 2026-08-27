@@ -20,6 +20,7 @@ import Recommendations from "../pages/p2/Recommendations";
 import DemandPlanning from "../pages/p2/DemandPlanning";
 import ProductionScheduling from "../pages/p2/ProductionScheduling";
 import MarkdownDecisionCenter from "../pages/p2/MarkdownDecisionCenter";
+import Users from "../pages/users/Users";
 
 export default function AppRoutes({ ManagerGuard, AuthGate }) {
   return (
@@ -47,6 +48,7 @@ export default function AppRoutes({ ManagerGuard, AuthGate }) {
         <Route path="/p2/demand" element={<DemandPlanning />} />
         <Route path="/p2/production" element={<ProductionScheduling />} />
         <Route path="/p2/markdown" element={<MarkdownDecisionCenter />} />
+        <Route path="/users" element={<Users />} />
       </Route>
     </Routes>
   );

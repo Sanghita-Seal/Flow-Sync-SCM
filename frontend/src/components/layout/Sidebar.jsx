@@ -1,7 +1,8 @@
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { LayoutDashboard, Truck, Bell, Calendar, ShoppingCart, Shield, Lightbulb, Container, BarChart3, Package, Anchor, X, TrendingUp, Factory, Tag } from "lucide-react";
+import { LayoutDashboard, Truck, Bell, Calendar, ShoppingCart, Shield, Lightbulb, Container, BarChart3, Package, Anchor, X, TrendingUp, Factory, Tag, Users } from "lucide-react";
 import { useSidebar } from "../../context/SidebarContext";
+import { useAuth } from "../../context/AuthContext";
 
 const NAV_SECTIONS = [
   {
@@ -32,6 +33,19 @@ const NAV_SECTIONS = [
 
 function SidebarContent() {
   const { close } = useSidebar();
+  const { isManager } = useAuth();
+
+  const sections = [
+    ...NAV_SECTIONS,
+    ...(isManager
+      ? [
+          {
+            label: "User",
+            items: [{ to: "/users", label: "Manage Users", icon: Users }],
+          },
+        ]
+      : []),
+  ];
 
   return (
     <div className="flex flex-col h-full">
@@ -60,7 +74,7 @@ function SidebarContent() {
           Dashboard
         </NavLink>
 
-        {NAV_SECTIONS.map((section) => (
+        {sections.map((section) => (
           <div key={section.label} className="mt-4">
             <div className="px-3 mb-2">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
