@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Search, X, Loader2 } from "lucide-react";
 
-export default function TruckSearch({ onSearch, loading = false, placeholder = "Search by tracking number, trailer ID, or shipment reference (e.g. TRK-001, TRAILER-001, or UUID)" }) {
-  const [value, setValue] = useState("");
+export default function TruckSearch({ onSearch, loading = false, initialValue = "", placeholder = "Search by tracking number, trailer ID, or shipment reference (e.g. TRK-001, TRAILER-001, or UUID)" }) {
+  const [value, setValue] = useState(initialValue);
 
   function handleChange(e) {
     setValue(e.target.value);
