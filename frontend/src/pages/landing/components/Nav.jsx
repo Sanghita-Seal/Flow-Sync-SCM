@@ -27,7 +27,7 @@ export default function Nav() {
 
   return (
     <header className={"sticky top-0 z-50 w-full border-b " + shell}>
-      <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center justify-between gap-6 px-6">
+      <div className="mx-auto flex h-16 w-full max-w-300 items-center justify-between gap-6 px-6">
         <a href="#top" className="flex items-center gap-3">
           <Brand />
           <span className="flex flex-col leading-none">

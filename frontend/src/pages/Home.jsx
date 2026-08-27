@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center">
       <div className="text-center max-w-sm">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">SCM Control Tower</h1>
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">Flow Sync</h1>
         <p className="text-slate-600 mb-8">Supply chain visibility &amp; planning</p>
 
         {!isSignedIn ? (

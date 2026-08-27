@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { Truck, Package, Dock, AlertTriangle, Calendar, ShoppingCart, Shield, Lightbulb, Container, Warehouse, BarChart3, TrendingUp, Wifi } from "lucide-react";
+import { Truck, Package, Dock, AlertTriangle, Calendar, ShoppingCart, Shield, Container, Warehouse, BarChart3, TrendingUp, Wifi } from "lucide-react";
 import PageWrapper from "../../components/layout/PageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
