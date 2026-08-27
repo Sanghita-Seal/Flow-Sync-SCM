@@ -26,7 +26,7 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-    origin: "http://localhost:5173"
+    origin: "https://flowsyncs.site"
 }));
 
 // Health check
@@ -36,14 +36,14 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/health", (req, res) => {
+app.get("/health", (_, res) => {
   res.json({
     status: "healthy",
   });
 });
 
 // Database connection test
-app.get("/db-test", async (req, res) => {
+app.get("/db-test", async (_, res) => {
   try {
     const result = await pool.query("SELECT NOW()");
 
