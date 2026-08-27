@@ -57,7 +57,7 @@ export default function TruckTracker() {
   }, [query, trucks]);
 
   const selectedTruck = trucks.find((t) => t.truckId === selectedId) || null;
-  const shouldSimulate = selectedTruck && selectedTruck.status === "IN_TRANSIT";
+  const shouldSimulate = selectedTruck && (selectedTruck.status === "IN_TRANSIT" || selectedTruck.status === "DELAYED");
   const { position } = useTruckSimulation(selectedTruck, shouldSimulate);
 
   return (

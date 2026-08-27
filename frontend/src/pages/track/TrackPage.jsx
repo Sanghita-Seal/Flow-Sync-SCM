@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import PublicLayout from "../../layouts/PublicLayout";
@@ -15,6 +15,8 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
+const WAREHOUSE_POSITION = [22.5726, 88.3639];
+
 const STATUS_TEXT = {
   IN_TRANSIT: "On the way",
   ARRIVED: "Arrived at facility",
@@ -22,12 +24,37 @@ const STATUS_TEXT = {
 };
 
 function truckIcon(status) {
+  if (status === "DELAYED") {
+    return L.divIcon({
+      className: "",
+      html: `<div style="position:relative;display:inline-block;">
+        <div style="width:18px;height:18px;border-radius:50%;background:#ef4444;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>
+        <div style="position:absolute;top:-8px;right:-32px;background:#ef4444;color:white;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap;letter-spacing:0.3px;">DELAYED</div>
+      </div>`,
+      iconSize: [18, 18],
+      iconAnchor: [9, 9],
+    });
+  }
   const color = status === "ARRIVED" ? "#10b981" : status === "IN_TRANSIT" ? "#f59e0b" : "#94a3b8";
   return L.divIcon({
     className: "",
     html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>`,
     iconSize: [16, 16],
     iconAnchor: [8, 8],
+  });
+}
+
+function warehouseIcon() {
+  return L.divIcon({
+    className: "",
+    html: `<div style="width:20px;height:20px;background:#6366f1;border:2px solid white;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+    </div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
   });
 }
 
@@ -47,8 +74,7 @@ export default function TrackPage() {
   const [notFound, setNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Auto-simulate for IN_TRANSIT trucks
-  const shouldSimulate = truck && truck.status === "IN_TRANSIT";
+  const shouldSimulate = truck && (truck.status === "IN_TRANSIT" || truck.status === "DELAYED");
   const { position } = useTruckSimulation(truck, shouldSimulate);
 
   async function handleTrack() {
@@ -81,11 +107,11 @@ export default function TrackPage() {
     }
   }
 
-  // Use simulated position if available, otherwise use API coords
   const displayLat = position ? position.latitude : truck ? Number(truck.latitude) : 0;
   const displayLng = position ? position.longitude : truck ? Number(truck.longitude) : 0;
 
   const hasCoords = displayLat !== 0 && displayLng !== 0 && !isNaN(displayLat) && !isNaN(displayLng);
+  const showPolyline = hasCoords && truck && (truck.status === "IN_TRANSIT" || truck.status === "DELAYED");
 
   return (
     <PublicLayout>
@@ -113,7 +139,6 @@ export default function TrackPage() {
 
       {truck && (
         <div className="rounded-card border border-border bg-page shadow-card overflow-hidden">
-          {/* Map */}
           {hasCoords ? (
             <div className="relative h-72">
               <MapContainer
@@ -133,9 +158,26 @@ export default function TrackPage() {
                     <div>{truck.locationLabel || truck.yardName || ""}</div>
                   </Popup>
                 </Marker>
+
+                {/* Blue dotted polyline to warehouse */}
+                {showPolyline && (
+                  <>
+                    <Marker position={WAREHOUSE_POSITION} icon={warehouseIcon()}>
+                      <Popup><strong>Warehouse</strong></Popup>
+                    </Marker>
+                    <Polyline
+                      positions={[[displayLat, displayLng], WAREHOUSE_POSITION]}
+                      pathOptions={{
+                        color: "#3b82f6",
+                        weight: 2.5,
+                        dashArray: "8 8",
+                        opacity: 0.8,
+                      }}
+                    />
+                  </>
+                )}
               </MapContainer>
 
-              {/* Simulation badge */}
               {shouldSimulate && position && (
                 <div className="absolute top-3 right-3 z-[1000] bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-medium px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
@@ -149,7 +191,6 @@ export default function TrackPage() {
             </div>
           )}
 
-          {/* Details */}
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <span className="text-base font-semibold text-ink">{truck.truckId}</span>
