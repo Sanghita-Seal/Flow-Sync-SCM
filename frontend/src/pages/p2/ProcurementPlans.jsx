@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
+import { Activity } from "lucide-react";
 import PageWrapper from "../../components/layout/PageWrapper";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
+import { Button } from "../../components/ui/Button";
 import { Select } from "../../components/ui/Select";
 import { useCycle } from "../../context/CycleContext";
 import { getProcurement } from "../../features/p2/procurement/procurement.service";
@@ -93,6 +95,7 @@ export default function ProcurementPlans() {
                     <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Qty (m)</th>
                     <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Risk</th>
                     <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
+                    <th className="px-4 py-2.5"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
@@ -116,6 +119,19 @@ export default function ProcurementPlans() {
                           <Badge variant={RISK_VARIANT[plan.risk_level] || "emerald"}>{plan.risk_level}</Badge>
                         </td>
                         <td className="px-4 py-2.5 text-slate-700">{plan.status}</td>
+                        <td className="px-4 py-2.5">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/p2/procurement/${plan.id}/execution`);
+                            }}
+                          >
+                            <Activity size={12} className="mr-1" />
+                            Execution
+                          </Button>
+                        </td>
                       </motion.tr>
                     ))}
                   </AnimatePresence>

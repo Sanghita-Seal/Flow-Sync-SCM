@@ -15,6 +15,7 @@ import InventoryPage from "../pages/p2/InventoryPage";
 import SopCycles from "../pages/p2/SopCycles";
 import ProcurementPlans from "../pages/p2/ProcurementPlans";
 import ProcurementPlanDetail from "../pages/p2/ProcurementPlanDetail";
+import ProcurementExecution from "../pages/p2/ProcurementExecution";
 import RiskMonitor from "../pages/p2/RiskMonitor";
 import Recommendations from "../pages/p2/Recommendations";
 import DemandPlanning from "../pages/p2/DemandPlanning";
@@ -43,6 +44,7 @@ export default function AppRoutes({ ManagerGuard, AuthGate }) {
         <Route path="/p2/sop" element={<SopCycles />} />
         <Route path="/p2/procurement" element={<ProcurementPlans />} />
         <Route path="/p2/procurement/:planId" element={<ProcurementPlanDetail />} />
+        <Route path="/p2/procurement/:planId/execution" element={<ProcurementExecution />} />
         <Route path="/p2/risk" element={<RiskMonitor />} />
         <Route path="/p2/recommendations" element={<Recommendations />} />
         <Route path="/p2/demand" element={<DemandPlanning />} />
