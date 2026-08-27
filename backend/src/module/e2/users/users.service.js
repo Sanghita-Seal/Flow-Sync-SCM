@@ -1,21 +1,42 @@
+import https from "https";
+
 const CLERK_SECRET = process.env.CLERK_SECRET;
 const CLERK_API = "https://api.clerk.com/v1";
 
-function headers() {
-  return {
-    Authorization: `Bearer ${CLERK_SECRET}`,
-    "Content-Type": "application/json",
-  };
+function clerkRequest(method, path, body) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(path, CLERK_API);
+    const options = {
+      hostname: url.hostname,
+      path: url.pathname + url.search,
+      method,
+      headers: {
+        Authorization: `Bearer ${CLERK_SECRET}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    const req = https.request(options, (res) => {
+      let data = "";
+      res.on("data", (chunk) => (data += chunk));
+      res.on("end", () => {
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          reject(new Error(`Clerk API error: ${res.statusCode} - ${data}`));
+        } else {
+          resolve(JSON.parse(data));
+        }
+      });
+    });
+
+    req.on("error", reject);
+    if (body) req.write(JSON.stringify(body));
+    req.end();
+  });
 }
 
 export async function listUsers() {
   if (!CLERK_SECRET) throw new Error("CLERK_SECRET is not set");
-  const res = await fetch(`${CLERK_API}/users?limit=100`, { headers: headers() });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Clerk API error: ${res.status} - ${body}`);
-  }
-  const data = await res.json();
+  const data = await clerkRequest("GET", "/users?limit=100");
   return data.data.map((u) => ({
     id: u.id,
     email: u.email_addresses?.[0]?.email_address || "",
@@ -27,13 +48,9 @@ export async function listUsers() {
 }
 
 export async function updateUserRole(userId, role) {
-  const res = await fetch(`${CLERK_API}/users/${userId}`, {
-    method: "PATCH",
-    headers: headers(),
-    body: JSON.stringify({ public_metadata: { role } }),
+  const data = await clerkRequest("PATCH", `/users/${userId}`, {
+    public_metadata: { role },
   });
-  if (!res.ok) throw new Error(`Clerk API error: ${res.status}`);
-  const data = await res.json();
   return {
     id: data.id,
     role: data.public_metadata?.role || "user",
