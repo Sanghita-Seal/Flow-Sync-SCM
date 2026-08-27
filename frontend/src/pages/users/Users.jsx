@@ -11,7 +11,10 @@ export default function Users() {
   useEffect(() => {
     apiClient
       .get("/api/users")
-      .then((res) => setUsers(res.data.data))
+      .then((res) => {
+        console.log("USERS API RESPONSE:", res.data);
+        setUsers(res.data?.data || []);
+      })
       .catch((err) => {
         const msg = err.response?.data?.message || err.message || "Failed to load users";
         setError(msg);
