@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { motion } from "motion/react";
 
 import PageWrapper from "../../components/layout/PageWrapper";
@@ -14,9 +14,10 @@ import useTruckSimulation from "../../hooks/useTruckSimulation";
 
 
 export default function TruckTracker() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const initialSearch = location.state?.search || "";
   const [trucks, setTrucks] = useState([]);
-  const [query, setQuery] = useState(searchParams.get("search") || "");
+  const [query, setQuery] = useState(initialSearch);
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -49,15 +50,6 @@ export default function TruckTracker() {
     );
   });
 
-  // When trucks finish loading, sync query from URL param if present
-  useEffect(() => {
-    if (loading) return;
-    const urlSearch = searchParams.get("search") || "";
-    if (urlSearch && !query) {
-      setQuery(urlSearch);
-    }
-  }, [loading]);
-
   useEffect(() => {
     const q = query.trim().toLowerCase();
     if (!q) return;
@@ -75,7 +67,7 @@ export default function TruckTracker() {
   return (
     <PageWrapper title="E2 — Truck Tracker" description="Warehouse operations view — search, track, and monitor every truck in the network.">
       <div className="mb-4">
-        <TruckSearch onSearch={setQuery} loading={loading} initialValue={searchParams.get("search") || ""} />
+        <TruckSearch onSearch={setQuery} loading={loading} initialValue={initialSearch} />
       </div>
 
       {/* Yard Warnings */}
