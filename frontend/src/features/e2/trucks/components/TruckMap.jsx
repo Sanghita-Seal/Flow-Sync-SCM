@@ -48,24 +48,27 @@ function selectedTruckIcon(status) {
 function warehouseIcon() {
   return L.divIcon({
     className: "",
-    html: `<div style="width:20px;height:20px;background:#6366f1;border:2px solid white;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    html: `<div style="width:32px;height:32px;background:#6366f1;border:2px solid white;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
         <polyline points="9 22 9 12 15 12 15 22"></polyline>
       </svg>
     </div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
   });
 }
 
-function ZoomToTruck({ position }) {
+function FitBounds({ positions }) {
   const map = useMap();
   useEffect(() => {
-    if (position) {
-      map.setView(position, 14, { animate: true, duration: 0.8 });
+    if (positions && positions.length >= 2) {
+      const bounds = L.latLngBounds(positions);
+      map.fitBounds(bounds, { padding: [60, 60], maxZoom: 11, animate: true, duration: 0.8 });
+    } else if (positions && positions.length === 1) {
+      map.setView(positions[0], 13, { animate: true, duration: 0.8 });
     }
-  }, [position, map]);
+  }, [positions, map]);
   return null;
 }
 
@@ -95,7 +98,11 @@ export default function TruckMap({ trucks, selectedId, onSelect, center = [22.9,
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
 
-        {hasValidPosition && <ZoomToTruck position={displayPosition} />}
+        {showPolyline ? (
+          <FitBounds positions={[displayPosition, WAREHOUSE_POSITION]} />
+        ) : hasValidPosition ? (
+          <FitBounds positions={[displayPosition]} />
+        ) : null}
 
         {visibleTrucks.map((t) => {
           const id = t.truckId || t.id;
@@ -138,7 +145,6 @@ export default function TruckMap({ trucks, selectedId, onSelect, center = [22.9,
           );
         })}
 
-        {/* Blue dotted polyline from truck to warehouse */}
         {showPolyline && (
           <>
             <Marker position={WAREHOUSE_POSITION} icon={warehouseIcon()}>

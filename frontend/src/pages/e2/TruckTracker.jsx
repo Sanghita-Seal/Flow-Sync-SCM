@@ -58,7 +58,8 @@ export default function TruckTracker() {
 
   const selectedTruck = trucks.find((t) => t.truckId === selectedId) || null;
   const shouldSimulate = selectedTruck && (selectedTruck.status === "IN_TRANSIT" || selectedTruck.status === "DELAYED");
-  const { position } = useTruckSimulation(selectedTruck, shouldSimulate);
+  const truckDirection = selectedTruck?.yardName ? "away" : "toward";
+  const { position } = useTruckSimulation(selectedTruck, shouldSimulate, truckDirection);
 
   return (
     <PageWrapper title="E2 — Truck Tracker" description="Warehouse operations view — search, track, and monitor every truck in the network.">
