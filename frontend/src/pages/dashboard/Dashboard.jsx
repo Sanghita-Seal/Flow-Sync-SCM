@@ -91,7 +91,7 @@ export default function Dashboard() {
 
   return (
     <PageWrapper
-      title="Welcome to SCM Control Tower"
+      title="Welcome to FlowSync"
       description="Visibility across supply-chain planning and warehouse execution, in one place."
       actions={
         <div className="flex items-center gap-3">

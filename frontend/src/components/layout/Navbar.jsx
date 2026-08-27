@@ -18,7 +18,7 @@ export default function Navbar() {
           <Menu width={20} height={20} />
         </button>
         <Link to="/" className="block">
-          <h1 className="text-base font-semibold text-slate-900 hover:text-blue-600 transition-colors">SCM Control Tower</h1>
+          <h1 className="text-base font-semibold text-slate-900 hover:text-blue-600 transition-colors">FlowSync</h1>
           <p className="text-xs text-slate-600 hidden sm:block">Supply chain visibility &amp; planning</p>
         </Link>
       </div>
