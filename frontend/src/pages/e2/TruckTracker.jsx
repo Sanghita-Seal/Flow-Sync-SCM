@@ -49,6 +49,15 @@ export default function TruckTracker() {
     );
   });
 
+  // When trucks finish loading, sync query from URL param if present
+  useEffect(() => {
+    if (loading) return;
+    const urlSearch = searchParams.get("search") || "";
+    if (urlSearch && !query) {
+      setQuery(urlSearch);
+    }
+  }, [loading]);
+
   useEffect(() => {
     const q = query.trim().toLowerCase();
     if (!q) return;
