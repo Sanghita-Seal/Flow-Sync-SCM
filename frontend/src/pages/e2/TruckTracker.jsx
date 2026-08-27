@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import { motion } from "motion/react";
 
 import PageWrapper from "../../components/layout/PageWrapper";
@@ -14,10 +13,8 @@ import useTruckSimulation from "../../hooks/useTruckSimulation";
 
 
 export default function TruckTracker() {
-  const location = useLocation();
-  const initialSearch = location.state?.search || "";
   const [trucks, setTrucks] = useState([]);
-  const [query, setQuery] = useState(initialSearch);
+  const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -67,7 +64,7 @@ export default function TruckTracker() {
   return (
     <PageWrapper title="E2 — Truck Tracker" description="Warehouse operations view — search, track, and monitor every truck in the network.">
       <div className="mb-4">
-        <TruckSearch onSearch={setQuery} loading={loading} initialValue={initialSearch} />
+        <TruckSearch onSearch={setQuery} loading={loading} />
       </div>
 
       {/* Yard Warnings */}

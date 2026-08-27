@@ -493,9 +493,14 @@ export default function ProcurementExecution() {
               View Shipment <ExternalLink size={10} className="ml-1" />
             </Button>
           )}
-          <Button variant="outline" size="sm" onClick={() => navigate("/e2/trucks", { state: { search: shipments[0]?.truck?.trailer_id || "" } })}>
+          <Button variant="outline" size="sm" onClick={() => navigate("/e2/trucks")}>
             Track Truck <ExternalLink size={10} className="ml-1" />
           </Button>
+          {shipments[0]?.truck?.trailer_id && (
+            <span className="text-xs text-slate-500 font-mono bg-slate-100 px-2 py-1 rounded">
+              {shipments[0].truck.trailer_id}
+            </span>
+          )}
           <Button variant="outline" size="sm" onClick={() => navigate("/e2/docks")}>
             Yard & Dock <ExternalLink size={10} className="ml-1" />
           </Button>
