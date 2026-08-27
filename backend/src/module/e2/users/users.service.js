@@ -49,7 +49,7 @@ export async function listUsers() {
 }
 
 export async function updateUserRole(userId, role) {
-  const data = await clerkRequest("PATCH", `/users/${userId}`, {
+  const data = await clerkRequest("PATCH", `/users/${userId}/metadata`, {
     public_metadata: { role },
   });
   return {
