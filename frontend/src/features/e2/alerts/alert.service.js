@@ -1,5 +1,35 @@
-// Derived client-side from truck/dock data — no dedicated backend
-// alerts endpoint exists yet.
+import apiClient from "../../../api/apiClient";
+
+// ============================================================
+// API-BASED ALERT FUNCTIONS
+// These call the backend alerts endpoints
+// ============================================================
+
+// GET /api/e2/alerts
+// Fetch delayed truck alerts from the server
+export async function fetchDelayedTruckAlerts() {
+  const res = await apiClient.get("/api/e2/alerts");
+  return res.data.data;
+}
+
+// GET /api/e2/alerts/dock/:yard_name
+// Check dock availability for a specific yard
+export async function checkDockAvailability(yardName) {
+  const res = await apiClient.get(`/api/e2/alerts/dock/${encodeURIComponent(yardName)}`);
+  return res.data.data;
+}
+
+// GET /api/e2/alerts/yard/:yard_name
+// Check yard capacity for a specific yard
+export async function checkYardCapacity(yardName) {
+  const res = await apiClient.get(`/api/e2/alerts/yard/${encodeURIComponent(yardName)}`);
+  return res.data.data;
+}
+
+// ============================================================
+// CLIENT-SIDE ALERT DERIVATION (fallback)
+// Derived from truck/dock data when API is unavailable
+// ============================================================
 
 export function getAlerts(trucks, docks) {
   const alerts = [];

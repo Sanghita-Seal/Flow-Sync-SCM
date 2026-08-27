@@ -1,38 +1,50 @@
-import { useAuth } from "../../context/AuthContext";
-import Button from "../ui/Button";
-import { Bell, User } from "../ui/Icons";
-//import { Bell } from "../ui/Icons";
-//import { User } from "../ui/User"; // merge into Icons.jsx if you keep icons in one file
+import { UserButton, useAuth } from "@clerk/clerk-react";
+import { Link } from "react-router-dom";
+import { useSidebar } from "../../context/SidebarContext";
+import { Bell, Menu } from "../ui/Icons";
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { isSignedIn } = useAuth();
+  const { toggle } = useSidebar();
 
   return (
-    <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-slate-200 bg-white px-6">
-      <div>
-        <h1 className="text-base font-semibold text-slate-900">SCM Control Tower</h1>
-        <p className="text-xs text-slate-600">Supply chain visibility &amp; planning</p>
+    <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={toggle}
+          className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 lg:hidden"
+          aria-label="Toggle sidebar"
+        >
+          <Menu width={20} height={20} />
+        </button>
+        <Link to="/" className="block">
+          <h1 className="text-base font-semibold text-slate-900 hover:text-blue-600 transition-colors">SCM Control Tower</h1>
+          <p className="text-xs text-slate-600 hidden sm:block">Supply chain visibility &amp; planning</p>
+        </Link>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+      <div className="flex items-center gap-2 sm:gap-4">
+        <div className="hidden sm:flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           System operational
         </div>
 
-        <button className="rounded-md p-2 text-slate-600 hover:bg-slate-100" aria-label="Notifications">
+        <Link to="/alerts" className="rounded-md p-2 text-slate-600 hover:bg-slate-100" aria-label="Notifications">
           <Bell width={18} height={18} />
-        </button>
+        </Link>
 
-        <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600">
-            <User width={16} height={16} />
+        {isSignedIn && (
+          <div className="border-l border-slate-200 pl-2 sm:pl-4">
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  avatarBox: "w-8 h-8",
+                },
+              }}
+            />
           </div>
-          <span className="text-sm font-medium text-slate-800">{user?.name || "Guest"}</span>
-          <Button variant="ghost" size="sm" onClick={logout}>
-            Log out
-          </Button>
-        </div>
+        )}
       </div>
     </header>
   );

@@ -1,29 +1,33 @@
-const VARIANTS = {
-  primary: "bg-blue-600 text-white hover:bg-blue-700",
-  secondary: "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50",
-  ghost: "text-slate-600 hover:bg-slate-100",
-  danger: "bg-rose-600 text-white hover:bg-rose-700",
+import { cn } from "../../lib/utils";
+
+const buttonVariants = {
+  default: "bg-slate-900 text-slate-50 hover:bg-slate-900/90",
+  destructive: "bg-rose-500 text-slate-50 hover:bg-rose-500/90",
+  outline: "border border-slate-200 bg-white hover:bg-slate-100 text-slate-950",
+  secondary: "bg-slate-100 text-slate-900 hover:bg-slate-100/80",
+  ghost: "hover:bg-slate-100 text-slate-950",
+  link: "text-slate-900 underline-offset-4 hover:underline",
 };
 
-const SIZES = {
-  sm: "px-2.5 py-1.5 text-xs",
-  md: "px-4 py-2 text-sm",
-  lg: "px-5 py-2.5 text-base",
+const buttonSizes = {
+  default: "h-10 px-4 py-2",
+  sm: "h-9 rounded-md px-3",
+  lg: "h-11 rounded-md px-8",
+  icon: "h-10 w-10",
 };
 
-export default function Button({
-  children,
-  variant = "primary",
-  size = "md",
-  className = "",
-  ...props
-}) {
+function Button({ className, variant = "default", size = "default", ...props }) {
   return (
     <button
-      className={`rounded-md font-medium transition-colors ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
+      className={cn(
+        "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+        buttonVariants[variant],
+        buttonSizes[size],
+        className
+      )}
       {...props}
-    >
-      {children}
-    </button>
+    />
   );
 }
+
+export { Button };

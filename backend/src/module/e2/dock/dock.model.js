@@ -18,27 +18,6 @@ class DockModel {
     return result.rows;
   }
 
-  static async getDockAssignments() {
-  const query = `
-    SELECT
-      da.id,
-      da.trailer_id,
-      da.dock_code,
-      da.yard_name,
-      t.priority,
-      t.status AS truck_status,
-      t.current_eta
-    FROM e2.dock_assignments da
-    JOIN e2.trucks t
-      ON t.trailer_id = da.trailer_id
-    ORDER BY da.yard_name, da.dock_code;
-  `;
-
-  const result = await pool.query(query);
-
-  return result.rows;
-}
-
   // Get dock by dock code
   static async getDockByCode(dockCode) {
     const query = `
@@ -73,8 +52,29 @@ class DockModel {
 
     return result.rows;
   }
-  
-// Assign available docks to eligible arrived trucks
+
+  static async getDockAssignments() {
+    const query = `
+      SELECT
+        da.id,
+        da.trailer_id,
+        da.dock_code,
+        da.yard_name,
+        t.priority,
+        t.status AS truck_status,
+        t.current_eta
+      FROM e2.dock_assignments da
+      JOIN e2.trucks t
+        ON t.trailer_id = da.trailer_id
+      ORDER BY da.yard_name, da.dock_code;
+    `;
+
+    const result = await pool.query(query);
+
+    return result.rows;
+  }
+
+  // Assign available docks to eligible arrived trucks
   static async assignDocks() {
     const client = await pool.connect();
 

@@ -39,3 +39,9 @@ Thumbs.db
 # Local database backups
 *.sql
 *.dump
+
+frontend-remaining
+changelog.md
+error.md
+task.md
+think.md

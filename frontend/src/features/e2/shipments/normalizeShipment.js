@@ -1,11 +1,7 @@
 /**
  * Raw shape from GET /api/e2/shipment:
- * { id, shipment_reference, origin, destination, status }
- *
- * Note: no truck_id, eta, or progress on the shipment record itself.
- * The truck record links to a shipment via truck.shipment_id — if we
- * need ETA/progress per shipment, join client-side against the trucks
- * list by matching shipment_id, or ask backend to include it.
+ * { id, shipment_reference, origin, destination, status,
+ *   procurement_plan_id, planned_arrival, planned_quantity_m, received_quantity_m }
  */
 export function normalizeShipment(raw) {
   return {
@@ -13,7 +9,11 @@ export function normalizeShipment(raw) {
     reference: raw.shipment_reference,
     origin: raw.origin,
     destination: raw.destination,
-    status: raw.status, // IN_TRANSIT | ARRIVED | DELAYED
+    status: raw.status,
+    procurementPlanId: raw.procurement_plan_id,
+    plannedArrival: raw.planned_arrival,
+    plannedQuantityM: raw.planned_quantity_m ? Number(raw.planned_quantity_m) : null,
+    receivedQuantityM: raw.received_quantity_m ? Number(raw.received_quantity_m) : null,
   };
 }
 

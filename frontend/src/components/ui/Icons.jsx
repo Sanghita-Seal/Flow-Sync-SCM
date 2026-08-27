@@ -110,3 +110,14 @@ export const Bell = (p) => base(p, <>
   <path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6" />
   <path d="M10 20a2 2 0 0 0 4 0" />
 </>);
+
+export const Menu = (p) => base(p, <>
+  <line x1="4" x2="20" y1="12" y2="12" />
+  <line x1="4" x2="20" y1="6" y2="6" />
+  <line x1="4" x2="20" y1="18" y2="18" />
+</>);
+
+export const X = (p) => base(p, <>
+  <path d="M18 6 6 18" />
+  <path d="m6 6 12 12" />
+</>);
