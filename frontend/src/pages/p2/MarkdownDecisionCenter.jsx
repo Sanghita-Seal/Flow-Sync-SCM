@@ -1,30 +1,56 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { Tag, TrendingDown, BarChart3, AlertTriangle, Percent } from "lucide-react";
+import { Tag, TrendingDown, Percent, Package } from "lucide-react";
 import PageWrapper from "../../components/layout/PageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import AnimatedCard from "../../components/ui/AnimatedCard";
 import { getMarkdown, getMarkdownSummary } from "../../features/p2/markdown/markdown.service";
+import { getPlan } from "../../features/p2/sop/sop.service";
+import { useCycle } from "../../context/CycleContext";
 
 export default function MarkdownDecisionCenter() {
+  const { selectedCycleId } = useCycle();
   const [markdown, setMarkdown] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState("markdown_pct");
+  const [sortKey, setSortKey] = useState("excess_inventory_units");
   const [sortDir, setSortDir] = useState("desc");
 
   useEffect(() => {
     setLoading(true);
+    const planPromise = selectedCycleId
+      ? getPlan(selectedCycleId).catch(() => [])
+      : Promise.resolve([]);
+
     Promise.all([
       getMarkdown().catch(() => []),
       getMarkdownSummary().catch(() => null),
-    ]).then(([m, s]) => {
-      setMarkdown(Array.isArray(m) ? m : []);
+      planPromise,
+    ]).then(([m, s, plan]) => {
+      const markdownData = Array.isArray(m) ? m : [];
+      const planData = Array.isArray(plan) ? plan : [];
+
+      const planByProduct = new Map();
+      for (const line of planData) {
+        planByProduct.set(line.product_id, line);
+      }
+
+      const enriched = markdownData.map((item) => {
+        const planLine = planByProduct.get(item.product_id);
+        return {
+          ...item,
+          excess_inventory_units: planLine
+            ? Number(planLine.excess_inventory_units)
+            : null,
+        };
+      });
+
+      setMarkdown(enriched);
       setSummary(s);
     }).finally(() => setLoading(false));
-  }, []);
+  }, [selectedCycleId]);
 
   const filtered = markdown.filter((m) => {
     if (!search) return true;
@@ -37,8 +63,8 @@ export default function MarkdownDecisionCenter() {
   });
 
   const sorted = [...filtered].sort((a, b) => {
-    const aVal = Number(a[sortKey] || 0);
-    const bVal = Number(b[sortKey] || 0);
+    const aVal = a[sortKey] == null ? -Infinity : Number(a[sortKey] || 0);
+    const bVal = b[sortKey] == null ? -Infinity : Number(b[sortKey] || 0);
     return sortDir === "asc" ? aVal - bVal : bVal - aVal;
   });
 
@@ -46,11 +72,13 @@ export default function MarkdownDecisionCenter() {
     if (sortKey === key) { setSortDir(sortDir === "asc" ? "desc" : "asc"); } else { setSortKey(key); setSortDir("desc"); }
   }
 
-  const totalItems = summary?.record_count ?? markdown.length;
   const productCount = summary?.product_count ?? 0;
   const avgDiscount = summary?.average_markdown_pct ?? 0;
   const maxDiscount = summary?.maximum_markdown_pct ?? 0;
-  const highDiscountCount = markdown.filter((m) => Number(m.markdown_pct || 0) >= 30).length;
+  const totalUnitsAtRisk = markdown.reduce(
+    (sum, m) => sum + (m.excess_inventory_units ?? 0),
+    0
+  );
 
   return (
     <PageWrapper
@@ -71,16 +99,16 @@ export default function MarkdownDecisionCenter() {
                 <div className="text-lg font-bold text-slate-900">{productCount}</div>
               </div>
               <div className="rounded-lg border border-slate-200 bg-white p-3">
+                <div className="flex items-center gap-2 mb-1"><Package size={12} className="text-rose-500" /><span className="text-xs text-slate-500">Total Units at Risk</span></div>
+                <div className="text-lg font-bold text-rose-600">{totalUnitsAtRisk > 0 ? totalUnitsAtRisk.toLocaleString() : "—"}</div>
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-white p-3">
                 <div className="flex items-center gap-2 mb-1"><Percent size={12} className="text-emerald-500" /><span className="text-xs text-slate-500">Avg Discount</span></div>
                 <div className="text-lg font-bold text-emerald-600">{Number(avgDiscount).toFixed(1)}%</div>
               </div>
               <div className="rounded-lg border border-slate-200 bg-white p-3">
                 <div className="flex items-center gap-2 mb-1"><TrendingDown size={12} className="text-rose-500" /><span className="text-xs text-slate-500">Max Discount</span></div>
                 <div className="text-lg font-bold text-rose-600">{Number(maxDiscount).toFixed(1)}%</div>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-white p-3">
-                <div className="flex items-center gap-2 mb-1"><AlertTriangle size={12} className="text-amber-500" /><span className="text-xs text-slate-500">High Discount (30%+)</span></div>
-                <div className="text-lg font-bold text-amber-600">{highDiscountCount}</div>
               </div>
             </div>
           </AnimatedCard>
@@ -138,6 +166,7 @@ export default function MarkdownDecisionCenter() {
                     <tr>
                       <th className="px-3 py-2 text-left text-xs font-semibold uppercase text-slate-500">SKU</th>
                       <th className="px-3 py-2 text-left text-xs font-semibold uppercase text-slate-500">Product</th>
+                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500 cursor-pointer hover:text-blue-600" onClick={() => toggleSort("excess_inventory_units")}>Units at Risk {sortKey === "excess_inventory_units" ? (sortDir === "asc" ? "↑" : "↓") : ""}</th>
                       <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500 cursor-pointer hover:text-blue-600" onClick={() => toggleSort("markdown_pct")}>Markdown % {sortKey === "markdown_pct" ? (sortDir === "asc" ? "↑" : "↓") : ""}</th>
                       <th className="px-3 py-2 text-left text-xs font-semibold uppercase text-slate-500">Week</th>
                       <th className="px-3 py-2 text-left text-xs font-semibold uppercase text-slate-500">Reason</th>
@@ -147,11 +176,22 @@ export default function MarkdownDecisionCenter() {
                   <tbody className="divide-y divide-slate-100 bg-white">
                     {sorted.map((m, i) => {
                       const pct = Number(m.markdown_pct || 0);
+                      const units = m.excess_inventory_units;
                       return (
                         <motion.tr key={m.id || i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }} className="hover:bg-slate-50">
                           <td className="px-3 py-2 font-medium text-slate-900">{m.sku_code}</td>
                           <td className="px-3 py-2 text-slate-600">{m.product_name}</td>
-                          <td className="px-3 py-2 text-right font-semibold text-rose-600">{pct > 0 ? `${pct.toFixed(1)}%` : "—"}</td>
+                          <td className="px-3 py-2 text-right">
+                            {units != null ? (
+                              <span className="inline-flex flex-col items-end leading-tight">
+                                <span className="text-base font-bold text-rose-600">{units.toLocaleString()}</span>
+                                <span className="text-[10px] font-medium text-slate-400 uppercase">units</span>
+                              </span>
+                            ) : (
+                              <span className="text-sm text-slate-400">—</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2 text-right text-sm font-medium text-slate-600">{pct > 0 ? `${pct.toFixed(1)}%` : "—"}</td>
                           <td className="px-3 py-2 text-slate-500">{m.week || "—"}</td>
                           <td className="px-3 py-2 text-slate-500 text-xs">{m.reason || "—"}</td>
                           <td className="px-3 py-2 text-center">
