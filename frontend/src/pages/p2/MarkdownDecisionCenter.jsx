@@ -6,11 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Ca
 import { Badge } from "../../components/ui/Badge";
 import AnimatedCard from "../../components/ui/AnimatedCard";
 import { getMarkdown, getMarkdownSummary } from "../../features/p2/markdown/markdown.service";
-import { getPlan } from "../../features/p2/sop/sop.service";
-import { useCycle } from "../../context/CycleContext";
+import { getInventoryRisk } from "../../features/p2/inventory/inventory.service";
 
 export default function MarkdownDecisionCenter() {
-  const { selectedCycleId } = useCycle();
   const [markdown, setMarkdown] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,37 +18,35 @@ export default function MarkdownDecisionCenter() {
 
   useEffect(() => {
     setLoading(true);
-    const planPromise = selectedCycleId
-      ? getPlan(selectedCycleId).catch(() => [])
-      : Promise.resolve([]);
-
     Promise.all([
       getMarkdown().catch(() => []),
       getMarkdownSummary().catch(() => null),
-      planPromise,
-    ]).then(([m, s, plan]) => {
+      getInventoryRisk().catch(() => []),
+    ]).then(([m, s, riskData]) => {
       const markdownData = Array.isArray(m) ? m : [];
-      const planData = Array.isArray(plan) ? plan : [];
+      const riskList = Array.isArray(riskData) ? riskData : [];
 
-      const planByProduct = new Map();
-      for (const line of planData) {
-        planByProduct.set(line.product_id, line);
+      const riskByProduct = new Map();
+      for (const item of riskList) {
+        riskByProduct.set(item.product_id, item);
       }
 
       const enriched = markdownData.map((item) => {
-        const planLine = planByProduct.get(item.product_id);
+        const risk = riskByProduct.get(item.product_id);
+        if (!risk) return { ...item, excess_inventory_units: null };
+        const inventoryUnits = Number(risk.inventory_units ?? risk.current_inventory_units ?? 0);
+        const forecastDemand = Number(risk.total_forecast_demand ?? 0);
+        const excess = Math.max(0, inventoryUnits - forecastDemand);
         return {
           ...item,
-          excess_inventory_units: planLine
-            ? Number(planLine.excess_inventory_units)
-            : null,
+          excess_inventory_units: excess > 0 ? excess : null,
         };
       });
 
       setMarkdown(enriched);
       setSummary(s);
     }).finally(() => setLoading(false));
-  }, [selectedCycleId]);
+  }, []);
 
   const filtered = markdown.filter((m) => {
     if (!search) return true;
