@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Ca
 import { Badge } from "../../components/ui/Badge";
 import AnimatedCard from "../../components/ui/AnimatedCard";
 import { getMarkdown, getMarkdownSummary } from "../../features/p2/markdown/markdown.service";
-import { getInventoryRisk } from "../../features/p2/inventory/inventory.service";
+import { getInventory } from "../../features/p2/inventory/inventory.service";
 
 export default function MarkdownDecisionCenter() {
   const [markdown, setMarkdown] = useState([]);
@@ -21,25 +21,22 @@ export default function MarkdownDecisionCenter() {
     Promise.all([
       getMarkdown().catch(() => []),
       getMarkdownSummary().catch(() => null),
-      getInventoryRisk().catch(() => []),
-    ]).then(([m, s, riskData]) => {
+      getInventory().catch(() => []),
+    ]).then(([m, s, inventoryData]) => {
       const markdownData = Array.isArray(m) ? m : [];
-      const riskList = Array.isArray(riskData) ? riskData : [];
+      const inventoryList = Array.isArray(inventoryData) ? inventoryData : [];
 
-      const riskByProduct = new Map();
-      for (const item of riskList) {
-        riskByProduct.set(item.product_id, item);
+      const inventoryByProduct = new Map();
+      for (const item of inventoryList) {
+        inventoryByProduct.set(item.product_id, item);
       }
 
       const enriched = markdownData.map((item) => {
-        const risk = riskByProduct.get(item.product_id);
-        if (!risk) return { ...item, excess_inventory_units: null };
-        const inventoryUnits = Number(risk.inventory_units ?? risk.current_inventory_units ?? 0);
-        const forecastDemand = Number(risk.total_forecast_demand ?? 0);
-        const excess = Math.max(0, inventoryUnits - forecastDemand);
+        const inv = inventoryByProduct.get(item.product_id);
+        const units = inv ? Number(inv.current_inventory_units) : null;
         return {
           ...item,
-          excess_inventory_units: excess > 0 ? excess : null,
+          excess_inventory_units: units,
         };
       });
 
