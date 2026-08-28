@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Ca
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import AnimatedCard from "../../components/ui/AnimatedCard";
+import AIInsightCard from "../../components/ui/AIInsightCard";
 import { getProcurementPlanShipments } from "../../features/p2/procurement/procurement.service";
 
 const RISK_VARIANT = {
@@ -117,6 +118,32 @@ export default function ProcurementPlanDetail() {
           </Card>
         </AnimatedCard>
       </div>
+
+      <AnimatedCard delay={0.15}>
+        <div className="mt-6">
+          <AIInsightCard
+            type="plan_analysis"
+            data={{
+              sku: plan?.sku_code,
+              product_name: plan?.product_name,
+              fabric: plan?.fabric_type,
+              supplier: plan?.supplier_name,
+              required_fabric_m: plan?.required_fabric_m,
+              recommended_order_qty_m: plan?.recommended_order_qty_m,
+              lead_time_weeks: plan?.lead_time_weeks,
+              risk_level: plan?.risk_level,
+              status: plan?.status,
+              shipments: shipments.map((s) => ({
+                reference: s.shipment_reference,
+                status: s.status,
+                planned_quantity_m: s.planned_quantity_m,
+                received_quantity_m: s.received_quantity_m,
+                eta: s.truck?.current_eta || s.current_eta,
+              })),
+            }}
+          />
+        </div>
+      </AnimatedCard>
 
       <AnimatedCard delay={0.2}>
         <div className="mt-8">

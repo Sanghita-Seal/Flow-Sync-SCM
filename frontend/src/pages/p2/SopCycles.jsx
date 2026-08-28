@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Ca
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import AnimatedCard from "../../components/ui/AnimatedCard";
+import AIInsightCard from "../../components/ui/AIInsightCard";
 import { useCycle } from "../../context/CycleContext";
 import { createCycle, updateCycleStatus, getPlan, getPlanSummary, generatePlan, getRecommendations, generateRecommendations } from "../../features/p2/sop/sop.service";
 import { getDemand, getDemandSummary } from "../../features/p2/demand/demand.service";
@@ -553,6 +554,20 @@ export default function SopCycles() {
         <div className="mt-6 space-y-6">
           <CycleStatusWorkflow cycle={selectedCycle} onAdvance={handleAdvance} />
           <PlanReconciliation cycleId={selectedCycleId} />
+
+          {/* AI Cycle Summary */}
+          <AnimatedCard delay={0.15}>
+            <AIInsightCard
+              type="cycle_summary"
+              data={{
+                cycle_name: selectedCycle?.cycle_name,
+                status: selectedCycle?.status,
+                start_date: selectedCycle?.start_date,
+                end_date: selectedCycle?.end_date,
+              }}
+            />
+          </AnimatedCard>
+
           <IntegratedView cycleId={selectedCycleId} />
 
           {/* Cross-Functional Alignment */}

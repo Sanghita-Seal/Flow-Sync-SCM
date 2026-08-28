@@ -6,6 +6,7 @@ import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import AnimatedCard from "../../components/ui/AnimatedCard";
+import AIInsightCard from "../../components/ui/AIInsightCard";
 import { useCycle } from "../../context/CycleContext";
 import { getProcurementRisk } from "../../features/p2/procurement/procurement.service";
 
@@ -65,6 +66,21 @@ export default function RiskMonitor() {
                     <div className="mt-2 text-xs text-slate-500 flex gap-4">
                       <span>Required: {Number(risk.required_fabric_m || 0).toLocaleString()} m</span>
                       <span>Lead Time: {risk.lead_time_weeks || "—"} weeks</span>
+                    </div>
+                    <div className="mt-3">
+                      <AIInsightCard
+                        type="risk_analysis"
+                        data={{
+                          sku: risk.sku_code,
+                          product_name: risk.product_name,
+                          risk_level: risk.risk_level,
+                          required_fabric_m: risk.required_fabric_m,
+                          recommended_order_qty_m: risk.recommended_order_qty_m,
+                          lead_time_weeks: risk.lead_time_weeks,
+                          supplier: risk.supplier_name,
+                          planning_week: risk.planning_week,
+                        }}
+                      />
                     </div>
                   </CardContent>
                 </Card>

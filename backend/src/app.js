@@ -21,6 +21,7 @@ import yardRoutes from "./module/e2/yard/yard.routes.js";
 import shipmentRoutes from "./module/e2/shipment/shipment.routes.js";
 import alertRouter from "./module/e2/alerts/alert.routes.js";
 import userRoutes from "./module/e2/users/users.routes.js";
+import aiRoutes from "./module/ai/ai.routes.js";
 
 const app = express();
 
@@ -81,6 +82,7 @@ app.use("/api/p2/overview", overviewRoutes);
 app.use("/api/e2/overview", E2overviewRoutes);
 app.use("/api/e2/alerts", alertRouter);
 app.use("/api/users", userRoutes);
+app.use("/api/ai", aiRoutes);
 
 // 404 handler
 app.use(notFoundMiddleware);
