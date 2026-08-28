@@ -161,8 +161,6 @@ export default function Dashboard() {
   const shortageProducts = planSummary?.shortage_products ?? p2p.shortageProducts ?? 0;
   const excessProducts = planSummary?.excess_products ?? p2p.excessProducts ?? 0;
   const balancedProducts = planSummary?.balanced_products ?? p2p.balancedProducts ?? 0;
-  const totalProducts = planSummary?.product_count ?? p2p.productCount ?? 0;
-
   const overallStatus = shortageProducts > 0 ? "SHORTAGE" : excessProducts > 0 ? "EXCESS" : "BALANCED";
 
   const invRiskShortage = inventoryRisk.filter((r) => Number(r.current_inventory_units || 0) < Number(r.total_forecast_demand || 0) * 0.5);
@@ -212,12 +210,6 @@ export default function Dashboard() {
     { name: "In Transit", value: inTransit },
     { name: "Arrived", value: overview.shipmentsArrived },
     { name: "Delayed", value: delayedShipmentsCount },
-  ] : [];
-
-  const planStatusData = totalProducts > 0 ? [
-    { name: "Balanced", value: balancedProducts },
-    { name: "Shortage", value: shortageProducts },
-    { name: "Excess", value: excessProducts },
   ] : [];
 
   return (
@@ -489,15 +481,12 @@ export default function Dashboard() {
           )}
 
           <SectionTitle>Overview Charts</SectionTitle>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <AnimatedCard delay={0.8}>
               <Card><CardHeader><CardTitle className="text-base">Truck Status</CardTitle></CardHeader><CardContent>{truckStatusData.length > 0 ? <DonutChart data={truckStatusData} /> : <div className="text-xs text-slate-400 py-8 text-center">No data</div>}</CardContent></Card>
             </AnimatedCard>
             <AnimatedCard delay={0.85}>
               <Card><CardHeader><CardTitle className="text-base">Shipment Status</CardTitle></CardHeader><CardContent>{shipmentStatusData.length > 0 ? <DonutChart data={shipmentStatusData} /> : <div className="text-xs text-slate-400 py-8 text-center">No data</div>}</CardContent></Card>
-            </AnimatedCard>
-            <AnimatedCard delay={0.9}>
-              <Card><CardHeader><CardTitle className="text-base">Plan Status</CardTitle></CardHeader><CardContent>{planStatusData.length > 0 ? <DonutChart data={planStatusData} /> : <div className="text-xs text-slate-400 py-8 text-center">No data</div>}</CardContent></Card>
             </AnimatedCard>
           </div>
         </>
