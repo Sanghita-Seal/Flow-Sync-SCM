@@ -340,7 +340,7 @@ export default function P2Overview() {
             { label: "Forecast Demand", value: totalForecast, icon: TrendingUp, color: "blue" },
             { label: "Opening Inventory", value: openingInventory, icon: Package, color: "emerald" },
             { label: "Planned Production", value: plannedProduction, icon: Factory, color: "cyan" },
-            { label: "Shortage Units", value: shortageUnits, icon: AlertTriangle, color: "rose" },
+            { label: "Supply Gap", value: supplyGap, icon: AlertTriangle, color: "rose" },
           ].map((kpi, i) => (
             <AnimatedCard key={kpi.label} delay={i * 0.1}>
               <SpotlightCard>
