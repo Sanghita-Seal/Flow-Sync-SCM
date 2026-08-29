@@ -9,7 +9,7 @@ import { Button } from "../../components/ui/Button";
 import AnimatedCard from "../../components/ui/AnimatedCard";
 import AIInsightCard from "../../components/ui/AIInsightCard";
 import { useCycle } from "../../context/CycleContext";
-import { createCycle, updateCycleStatus, getPlan, getPlanSummary, generatePlan, getRecommendations, generateRecommendations } from "../../features/p2/sop/sop.service";
+import { createCycle, updateCycleStatus, getPlan, getPlanSummary, getRecommendations, generateRecommendations } from "../../features/p2/sop/sop.service";
 import { getDemand, getDemandSummary } from "../../features/p2/demand/demand.service";
 import { getProduction, getProductionCapacity } from "../../features/p2/production/production.service";
 import { getMarkdown, getMarkdownSummary } from "../../features/p2/markdown/markdown.service";
@@ -83,7 +83,6 @@ function PlanReconciliation({ cycleId }) {
   const [plan, setPlan] = useState(null);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
   const [expanded, setExpanded] = useState(null);
 
   useEffect(() => {
@@ -94,29 +93,13 @@ function PlanReconciliation({ cycleId }) {
       .finally(() => setLoading(false));
   }, [cycleId]);
 
-  async function handleGenerate() {
-    setGenerating(true);
-    try {
-      const result = await generatePlan(cycleId);
-      setPlan(result);
-      const s = await getPlanSummary(cycleId).catch(() => null);
-      setSummary(s);
-    } catch { /* ignore */ } finally { setGenerating(false); }
-  }
-
   if (loading) return <div className="text-sm text-slate-500 py-4 text-center">Loading plan data...</div>;
 
   const products = plan?.products || plan || [];
 
   return (
     <div className="space-y-4">
-      {/* Generate Button */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Forecast vs Capacity Reconciliation</h3>
-        <Button size="sm" onClick={handleGenerate} disabled={generating}>
-          <Play size={12} className="mr-1" /> {generating ? "Generating..." : "Generate S&OP Plan"}
-        </Button>
-      </div>
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Forecast vs Capacity Reconciliation</h3>
 
       {/* Summary KPIs */}
       {summary && (
@@ -196,7 +179,7 @@ function PlanReconciliation({ cycleId }) {
         </div>
       ) : (
         <div className="text-sm text-slate-400 text-center py-6 border border-dashed border-slate-200 rounded-lg">
-          No plan data yet. Click "Generate S&OP Plan" to create one.
+          No plan data available.
         </div>
       )}
     </div>

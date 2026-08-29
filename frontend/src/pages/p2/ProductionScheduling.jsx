@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { Package, TrendingUp, Factory, AlertTriangle, ArrowUpDown, Search } from "lucide-react";
+import { Package, TrendingUp, Factory, AlertTriangle, Search } from "lucide-react";
 import PageWrapper from "../../components/layout/PageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
@@ -146,60 +146,61 @@ export default function ProductionScheduling() {
             </div>
           </AnimatedCard>
 
-          {/* Main Section — Production Requirement vs Capacity */}
+          {/* Search + Detail Table */}
           <AnimatedCard delay={0.1}>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Production Requirement vs Capacity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-slate-200 text-sm">
-                    <thead className="bg-slate-50">
-                      <tr>
-                        <th className="px-3 py-2 text-left text-xs font-semibold uppercase text-slate-500">SKU</th>
-                        <th className="px-3 py-2 text-left text-xs font-semibold uppercase text-slate-500">Product</th>
-                        <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500 cursor-pointer hover:text-blue-600" onClick={() => toggleSort("required")}>Required {sortKey === "required" ? (sortDir === "asc" ? "↑" : "↓") : <ArrowUpDown size={10} className="inline" />}</th>
-                        <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500 cursor-pointer hover:text-blue-600" onClick={() => toggleSort("planned")}>Planned {sortKey === "planned" ? (sortDir === "asc" ? "↑" : "↓") : <ArrowUpDown size={10} className="inline" />}</th>
-                        <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500 cursor-pointer hover:text-blue-600" onClick={() => toggleSort("capacity")}>Capacity {sortKey === "capacity" ? (sortDir === "asc" ? "↑" : "↓") : <ArrowUpDown size={10} className="inline" />}</th>
-                        <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500 cursor-pointer hover:text-blue-600" onClick={() => toggleSort("gap")}>Gap {sortKey === "gap" ? (sortDir === "asc" ? "↑" : "↓") : <ArrowUpDown size={10} className="inline" />}</th>
-                        <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500 cursor-pointer hover:text-blue-600" onClick={() => toggleSort("utilization")}>Util% {sortKey === "utilization" ? (sortDir === "asc" ? "↑" : "↓") : <ArrowUpDown size={10} className="inline" />}</th>
-                        <th className="px-3 py-2 text-center text-xs font-semibold uppercase text-slate-500">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white">
-                      {sorted.map((p, i) => (
-                        <motion.tr key={p.id || i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }} className="hover:bg-slate-50">
-                          <td className="px-3 py-2 font-medium text-slate-900">{p.sku_code}</td>
-                          <td className="px-3 py-2 text-slate-600">{p.product_name}</td>
-                          <td className="px-3 py-2 text-right text-slate-700 font-medium">{p.required.toLocaleString()}</td>
-                          <td className="px-3 py-2 text-right text-slate-700 font-medium">{p.planned.toLocaleString()}</td>
-                          <td className="px-3 py-2 text-right text-slate-700">{p.capacity.toLocaleString()}</td>
-                          <td className={`px-3 py-2 text-right font-medium ${p.gap > 0 ? "text-rose-600" : p.gap < 0 ? "text-amber-600" : "text-slate-500"}`}>
-                            {p.gap > 0 ? `+${p.gap.toLocaleString()}` : p.gap < 0 ? p.gap.toLocaleString() : "0"}
-                          </td>
-                          <td className="px-3 py-2 text-right text-slate-700">{p.utilization}%</td>
-                          <td className="px-3 py-2 text-center"><Badge variant={STATUS_VARIANT[p.status] || "emerald"}>{p.status}</Badge></td>
-                        </motion.tr>
-                      ))}
-                    </tbody>
-                    <tfoot className="bg-slate-50 border-t border-slate-200">
-                      <tr className="font-semibold">
-                        <td className="px-3 py-2 text-slate-900" colSpan={2}>Total</td>
-                        <td className="px-3 py-2 text-right text-slate-900">{totalRequired.toLocaleString()}</td>
-                        <td className="px-3 py-2 text-right text-slate-900">{totalPlanned.toLocaleString()}</td>
-                        <td className="px-3 py-2 text-right text-slate-900">{totalCapacity.toLocaleString()}</td>
-                        <td className={`px-3 py-2 text-right ${totalGap > 0 ? "text-rose-600" : "text-slate-900"}`}>
-                          {totalGap > 0 ? `+${totalGap.toLocaleString()}` : "0"}
+            <div className="flex gap-3 items-center mb-3">
+              <div className="relative flex-1 max-w-md">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search by SKU or product..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            {sorted.length === 0 ? (
+              <div className="text-sm text-slate-500 py-8 text-center">No products match your search.</div>
+            ) : (
+              <div className="overflow-x-auto rounded-lg border border-slate-200">
+                <table className="min-w-full divide-y divide-slate-200 text-sm">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-3 py-2 text-left text-xs font-semibold uppercase text-slate-500">SKU</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold uppercase text-slate-500">Product</th>
+                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Forecast</th>
+                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Opening Inv</th>
+                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Required</th>
+                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Planned</th>
+                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Capacity</th>
+                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Gap</th>
+                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Util%</th>
+                      <th className="px-3 py-2 text-center text-xs font-semibold uppercase text-slate-500">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 bg-white">
+                    {sorted.map((p, i) => (
+                      <motion.tr key={p.id || i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }} className="hover:bg-slate-50">
+                        <td className="px-3 py-2 font-medium text-slate-900">{p.sku_code}</td>
+                        <td className="px-3 py-2 text-slate-600">{p.product_name}</td>
+                        <td className="px-3 py-2 text-right text-slate-700">{p.forecast.toLocaleString()}</td>
+                        <td className="px-3 py-2 text-right text-slate-700">{p.opening.toLocaleString()}</td>
+                        <td className="px-3 py-2 text-right text-slate-700 font-medium">{p.required.toLocaleString()}</td>
+                        <td className="px-3 py-2 text-right text-slate-700 font-medium">{p.planned.toLocaleString()}</td>
+                        <td className="px-3 py-2 text-right text-slate-700">{p.capacity.toLocaleString()}</td>
+                        <td className={`px-3 py-2 text-right font-medium ${p.gap > 0 ? "text-rose-600" : p.gap < 0 ? "text-amber-600" : "text-slate-500"}`}>
+                          {p.gap > 0 ? `+${p.gap.toLocaleString()}` : p.gap < 0 ? p.gap.toLocaleString() : "0"}
                         </td>
-                        <td className="px-3 py-2 text-right text-slate-900">{totalUtilization}%</td>
-                        <td className="px-3 py-2 text-center"><Badge variant={totalGap > 0 ? "rose" : "emerald"}>{totalGap > 0 ? "SHORTAGE" : "BALANCED"}</Badge></td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
+                        <td className="px-3 py-2 text-right text-slate-700">{p.utilization}%</td>
+                        <td className="px-3 py-2 text-center"><Badge variant={STATUS_VARIANT[p.status] || "emerald"}>{p.status}</Badge></td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </AnimatedCard>
 
           {/* Capacity Utilization */}
@@ -260,62 +261,7 @@ export default function ProductionScheduling() {
             </Card>
           </AnimatedCard>
 
-          {/* Search + Detail Table */}
-          <AnimatedCard delay={0.25}>
-            <div className="flex gap-3 items-center mb-3">
-              <div className="relative flex-1 max-w-md">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search by SKU or product..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
 
-            {sorted.length === 0 ? (
-              <div className="text-sm text-slate-500 py-8 text-center">No products match your search.</div>
-            ) : (
-              <div className="overflow-x-auto rounded-lg border border-slate-200">
-                <table className="min-w-full divide-y divide-slate-200 text-sm">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="px-3 py-2 text-left text-xs font-semibold uppercase text-slate-500">SKU</th>
-                      <th className="px-3 py-2 text-left text-xs font-semibold uppercase text-slate-500">Product</th>
-                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Forecast</th>
-                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Opening Inv</th>
-                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Required</th>
-                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Planned</th>
-                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Capacity</th>
-                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Gap</th>
-                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Util%</th>
-                      <th className="px-3 py-2 text-center text-xs font-semibold uppercase text-slate-500">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white">
-                    {sorted.map((p, i) => (
-                      <motion.tr key={p.id || i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }} className="hover:bg-slate-50">
-                        <td className="px-3 py-2 font-medium text-slate-900">{p.sku_code}</td>
-                        <td className="px-3 py-2 text-slate-600">{p.product_name}</td>
-                        <td className="px-3 py-2 text-right text-slate-700">{p.forecast.toLocaleString()}</td>
-                        <td className="px-3 py-2 text-right text-slate-700">{p.opening.toLocaleString()}</td>
-                        <td className="px-3 py-2 text-right text-slate-700 font-medium">{p.required.toLocaleString()}</td>
-                        <td className="px-3 py-2 text-right text-slate-700 font-medium">{p.planned.toLocaleString()}</td>
-                        <td className="px-3 py-2 text-right text-slate-700">{p.capacity.toLocaleString()}</td>
-                        <td className={`px-3 py-2 text-right font-medium ${p.gap > 0 ? "text-rose-600" : p.gap < 0 ? "text-amber-600" : "text-slate-500"}`}>
-                          {p.gap > 0 ? `+${p.gap.toLocaleString()}` : p.gap < 0 ? p.gap.toLocaleString() : "0"}
-                        </td>
-                        <td className="px-3 py-2 text-right text-slate-700">{p.utilization}%</td>
-                        <td className="px-3 py-2 text-center"><Badge variant={STATUS_VARIANT[p.status] || "emerald"}>{p.status}</Badge></td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </AnimatedCard>
         </>
       )}
     </PageWrapper>
