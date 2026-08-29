@@ -106,6 +106,7 @@ export function generateSopRecommendations({
   const markdownOpportunity = evaluateMarkdownOpportunity({
     projectedEndingInventory,
     forecastDemand,
+    openingInventory,
   });
 
   if (markdownOpportunity) {
