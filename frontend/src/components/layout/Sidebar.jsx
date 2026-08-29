@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { LayoutDashboard, Truck, Bell, Calendar, ShoppingCart, Shield, Lightbulb, Container, BarChart3, Package, Anchor, X, TrendingUp, Factory, Tag, Users } from "lucide-react";
+import { LayoutDashboard, Truck, Bell, Calendar, ShoppingCart, Shield, Lightbulb, Container, BarChart3, Package, Anchor, X, TrendingUp, Factory, Tag, Users, ChevronRight } from "lucide-react";
 import { useSidebar } from "../../context/SidebarContext";
 import { useAuth } from "../../context/AuthContext";
 
@@ -34,6 +35,7 @@ const NAV_SECTIONS = [
 function SidebarContent() {
   const { close } = useSidebar();
   const { isManager } = useAuth();
+  const [openSections, setOpenSections] = useState({});
 
   const sections = [
     ...NAV_SECTIONS,
@@ -46,6 +48,10 @@ function SidebarContent() {
         ]
       : []),
   ];
+
+  function toggleSection(label) {
+    setOpenSections((prev) => ({ ...prev, [label]: !prev[label] }));
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -74,32 +80,56 @@ function SidebarContent() {
           Dashboard
         </NavLink>
 
-        {sections.map((section) => (
-          <div key={section.label} className="mt-4">
-            <div className="px-3 mb-2">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                {section.label}
-              </span>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              {section.items.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  onClick={close}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      isActive ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50"
-                    }`
-                  }
+        {sections.map((section) => {
+          const isOpen = !!openSections[section.label];
+          return (
+            <div key={section.label} className="mt-4">
+              <button
+                onClick={() => toggleSection(section.label)}
+                className="flex items-center justify-between w-full px-3 mb-2 group"
+              >
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 group-hover:text-slate-600 transition-colors">
+                  {section.label}
+                </span>
+                <motion.span
+                  animate={{ rotate: isOpen ? 90 : 0 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <item.icon size={16} />
-                  {item.label}
-                </NavLink>
-              ))}
+                  <ChevronRight size={12} className="text-slate-400" />
+                </motion.span>
+              </button>
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="flex flex-col gap-0.5">
+                      {section.items.map((item) => (
+                        <NavLink
+                          key={item.to}
+                          to={item.to}
+                          onClick={close}
+                          className={({ isActive }) =>
+                            `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              isActive ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50"
+                            }`
+                          }
+                        >
+                          <item.icon size={16} />
+                          {item.label}
+                        </NavLink>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
